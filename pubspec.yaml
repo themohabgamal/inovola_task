@@ -13,24 +13,35 @@ dependencies:
   flutter_screenutil: ^5.9.3
   # State Management
   flutter_bloc: ^9.1.1
+  equatable: ^2.0.5
   # Network
   cached_network_image: ^3.4.1
   # UI
   flutter_svg: ^2.2.0
-  skeletonizer: ^1.3.0
+  shimmer: ^3.0.0
+  intl: ^0.19.0
   # Animations
   flutter_animate: ^4.5.2
+  # Utils
+  image_picker: ^1.1.1
+  # Database
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0   
+
 dev_dependencies:
   flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
+  build_runner:   
+  hive_generator: ^2.0.1    
 
 flutter:
-
   uses-material-design: true
+
   assets:
     - assets/icons/
     - assets/images/
+
   fonts:
     - family: Poppins
       fonts:
@@ -39,12 +50,3 @@ flutter:
           weight: 700
         - asset: assets/font/Poppins-Medium.ttf
         - asset: assets/font/Poppins-SemiBold.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package

@@ -35,7 +35,7 @@ class ExpenseItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppDimens.radiusL),
             ),
             child: Icon(
-              _getIconData(expense.iconName),
+              _getIconData(expense.iconName ?? ''),
               color: expense.backgroundColor,
               size: AppDimens.iconM,
             ),
@@ -72,7 +72,7 @@ class ExpenseItem extends StatelessWidget {
               ),
               SizedBox(height: 2.h),
               Text(
-                expense.time,
+                expense.time ?? '',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -92,6 +92,28 @@ class ExpenseItem extends StatelessWidget {
         return Icons.directions_car_outlined;
       case 'home':
         return Icons.home_outlined;
+      case 'local_gas_station':
+        return Icons.local_gas_station_outlined;
+      case 'shopping_bag':
+        return Icons.shopping_bag_outlined;
+      case 'newspaper':
+        return Icons.newspaper_outlined;
+      case 'restaurant':
+        return Icons.restaurant_outlined;
+      case 'local_hospital':
+        return Icons.local_hospital_outlined;
+      case 'school':
+        return Icons.school_outlined;
+      case 'flight':
+        return Icons.flight_outlined;
+      case 'electrical_services':
+        return Icons.electrical_services_outlined;
+      case 'security':
+        return Icons.security_outlined;
+      case 'fitness_center':
+        return Icons.fitness_center_outlined;
+      case 'checkroom':
+        return Icons.checkroom_outlined;
       default:
         return Icons.category_outlined;
     }

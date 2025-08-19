@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/core/constants/app_strings.dart';
+import 'package:inovola_task/features/dashboard/presentation/pages/widgets/time_period_drop_down.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/widgets/user_avatar.dart';
 
 class HeaderSection extends StatelessWidget {
@@ -13,7 +14,8 @@ class HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppDimens.paddingL),
+      padding: EdgeInsets.symmetric(horizontal: AppDimens.paddingL)
+          .copyWith(top: AppDimens.paddingM),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,35 +42,7 @@ class HeaderSection extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppDimens.paddingS,
-              vertical: AppDimens.paddingXS,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppDimens.radiusS),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  AppStrings.thisMonth,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.black,
-                        fontSize: 12.sp,
-                        letterSpacing: 0.8,
-                      ),
-                ),
-                SizedBox(width: AppDimens.paddingXS),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  color: AppColors.black,
-                  size: AppDimens.iconM,
-                ),
-              ],
-            ),
-          ),
+          TimePeriodDropdown()
         ],
       ),
     );

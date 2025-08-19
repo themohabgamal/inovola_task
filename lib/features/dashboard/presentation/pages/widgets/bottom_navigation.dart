@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
+import 'package:inovola_task/core/routing/routes.dart';
 
 class BottomNavigation extends StatelessWidget {
   final int selectedIndex;
@@ -17,7 +18,7 @@ class BottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60.h + MediaQuery.of(context).padding.bottom,
+      height: 76.h + MediaQuery.of(context).padding.bottom,
       decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
@@ -34,7 +35,7 @@ class BottomNavigation extends StatelessWidget {
           children: [
             _buildNavItem('assets/icons/home.svg', 0),
             _buildNavItem('assets/icons/analysis.svg', 1),
-            _buildAddButton(),
+            _buildAddButton(context: context),
             _buildNavItem('assets/icons/wallet.svg', 2),
             _buildNavItem('assets/icons/user.svg', 3),
           ],
@@ -63,9 +64,9 @@ class BottomNavigation extends StatelessWidget {
     );
   }
 
-  Widget _buildAddButton() {
+  Widget _buildAddButton({required BuildContext context}) {
     return GestureDetector(
-      onTap: () => onItemTapped?.call(4), // Index 4 for add button
+      onTap: () => Navigator.pushNamed(context, Routes.addExpenseScreen),
       child: Container(
         width: 48.r,
         height: 48.r,

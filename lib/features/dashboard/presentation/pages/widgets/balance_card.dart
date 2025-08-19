@@ -32,7 +32,8 @@ class BalanceCard extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           children: [
             Padding(
-              padding: EdgeInsets.all(AppDimens.paddingL),
+              padding: EdgeInsets.all(AppDimens.paddingM).copyWith(
+                  left: AppDimens.paddingL, right: AppDimens.paddingL),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -67,7 +68,7 @@ class BalanceCard extends StatelessWidget {
                   ),
                   SizedBox(height: AppDimens.paddingS),
                   Text(
-                    '\$${totalBalance.toStringAsFixed(2)}',
+                    '\$ ${totalBalance.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
                   Spacer(),

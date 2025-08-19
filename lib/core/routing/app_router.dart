@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:inovola_task/core/routing/routes.dart';
-import 'package:inovola_task/features/dashboard/data/datasources/dashboard_local_datasource.dart';
-import 'package:inovola_task/features/dashboard/domain/repositories/dashboard_repository_impl.dart';
-import 'package:inovola_task/features/dashboard/domain/usecases/get_dashboard_data.dart';
+import 'package:inovola_task/core/services/image_picking_service.dart';
+import 'package:inovola_task/features/add_expense/data/repositories/hive_expense_repository.dart';
+import 'package:inovola_task/features/add_expense/domain/usecases/add_expense_usecase.dart';
+import 'package:inovola_task/features/add_expense/domain/usecases/get_categories_usecase.dart';
+import 'package:inovola_task/features/add_expense/presentation/bloc/add_expense_bloc.dart';
+import 'package:inovola_task/features/add_expense/presentation/ui/add_expense_page.dart';
 import 'package:inovola_task/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:inovola_task/features/splash_screen.dart';
@@ -20,18 +23,23 @@ class AppRouter {
       case Routes.dashboardScreen:
         return _buildModernSlideTransitionRoute(
           builder: (_) => BlocProvider(
-            create: (context) => DashboardCubit(
-              getDashboardData: GetDashboardData(
-                repository: DashboardRepositoryImpl(
-                  localDataSource: DashboardLocalDataSource(),
-                ),
-              ),
-            )..loadDashboardData(),
+            create: (context) => DashboardCubit()..loadDashboardData(),
             child: DashboardPage(),
           ),
           settings: settings,
         );
-
+      case Routes.addExpenseScreen:
+        return _buildModernSlideTransitionRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => AddExpenseBloc(
+                imagePickerService: ImagePickerService(),
+                getCategoriesUseCase:
+                    GetCategoriesUseCase(HiveExpenseRepository()),
+                addExpenseUseCase: AddExpenseUseCase(HiveExpenseRepository())),
+            child: const AddExpensePage(),
+          ),
+          settings: settings,
+        );
       default:
         return _buildModernSlideTransitionRoute(
           builder: (_) => const Placeholder(),

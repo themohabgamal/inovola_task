@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
+import 'package:inovola_task/core/constants/app_text_styles.dart';
 
 class EmptyState extends StatelessWidget {
   final VoidCallback onAddPressed;
@@ -14,25 +15,20 @@ class EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey[400]),
           SizedBox(height: 16),
-          Text(
-            'No expenses yet',
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(color: Colors.grey[600]),
-          ),
+          Text('No expenses yet',
+              style: AppTextStyles.font14Weight600Black
+                  .copyWith(color: Colors.grey)),
           SizedBox(height: 8),
-          Text(
-            'Start tracking your expenses',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: Colors.grey[500]),
-          ),
+          Text('Start tracking your expenses',
+              style: AppTextStyles.font12Weight400Black
+                  .copyWith(color: Colors.grey)),
           SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: onAddPressed,
-            icon: Icon(Icons.add),
+            icon: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
             label: Text('Add Expense'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.black,

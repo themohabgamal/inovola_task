@@ -47,10 +47,13 @@ class DashboardHeader extends StatelessWidget {
         Positioned(
           top: -266,
           right: -30,
-          child: CustomPaint(
-            size: Size(500, 500),
-            painter: CircleRingsPainter(),
-          ).animate().fadeIn(delay: 200.ms, duration: 800.ms),
+          child: IgnorePointer(
+            // Add this wrapper
+            child: CustomPaint(
+              size: Size(500, 500),
+              painter: CircleRingsPainter(),
+            ).animate().fadeIn(delay: 200.ms, duration: 800.ms),
+          ),
         ),
       ],
     );

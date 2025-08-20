@@ -23,30 +23,9 @@ class HiveExpenseRepository implements ExpenseRepository {
     await _initializeBoxes();
     final categoriesBox = Hive.box<CategoryEntity>(_categoriesBoxName);
 
-    // If no categories exist, add default ones
-    if (categoriesBox.isEmpty) {
-      await _addDefaultCategories();
-    }
+    if (categoriesBox.isEmpty) {}
 
     return categoriesBox.values.toList();
-  }
-
-  Future<void> _addDefaultCategories() async {
-    final categoriesBox = Hive.box<CategoryEntity>(_categoriesBoxName);
-
-    final defaultCategories = [
-      CategoryEntity(name: 'Groceries', icon: '🛒', color: '0xFF6366F1'),
-      CategoryEntity(name: 'Entertainment', icon: '🎬', color: '0xFF3B82F6'),
-      CategoryEntity(name: 'Gas', icon: '⛽', color: '0xFFEF4444'),
-      CategoryEntity(name: 'Shopping', icon: '🛍️', color: '0xFFF59E0B'),
-      CategoryEntity(name: 'News Paper', icon: '📰', color: '0xFF8B5CF6'),
-      CategoryEntity(name: 'Transport', icon: '🚗', color: '0xFF10B981'),
-      CategoryEntity(name: 'Rent', icon: '🏠', color: '0xFFF97316'),
-    ];
-
-    for (int i = 0; i < defaultCategories.length; i++) {
-      await categoriesBox.put(i, defaultCategories[i]);
-    }
   }
 
   @override

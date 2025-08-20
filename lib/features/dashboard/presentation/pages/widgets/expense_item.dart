@@ -11,8 +11,17 @@ class ExpenseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate display values with null checks
+    final bool isDifferentCurrency = expense.currency != 'USD';
+    final String originalAmountText =
+        '${expense.amount.toStringAsFixed(2)} ${expense.currency}';
+
+    // Ensure convertedAmount is not null, fallback to amount if it is
+    final double displayAmount = expense.convertedAmount ?? expense.amount;
+    final String usdAmountText = '-\$${displayAmount.toStringAsFixed(2)}';
+
     return Container(
-      height: AppDimens.expenseItemHeight,
+      height: AppDimens.expenseItemHeight + 5,
       padding: EdgeInsets.all(AppDimens.paddingS),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
@@ -31,12 +40,12 @@ class ExpenseItem extends StatelessWidget {
             width: 38.r,
             height: 38.r,
             decoration: BoxDecoration(
-              color: expense.backgroundColor.withValues(alpha: 0.2),
+              color: (expense.backgroundColor ?? Colors.grey).withOpacity(0.2),
               borderRadius: BorderRadius.circular(AppDimens.radiusL),
             ),
             child: Icon(
               _getIconData(expense.iconName ?? ''),
-              color: expense.backgroundColor,
+              color: expense.backgroundColor ?? Colors.grey,
               size: AppDimens.iconM,
             ),
           ),
@@ -63,18 +72,29 @@ class ExpenseItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Display USD amount
               Text(
-                '-\$${expense.amount.toStringAsFixed(0)}',
+                usdAmountText,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: AppColors.black,
                     ),
               ),
               SizedBox(height: 2.h),
-              Text(
-                expense.time ?? '',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              // Display original amount if different currency
+              if (isDifferentCurrency)
+                Text(
+                  originalAmountText,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                        fontSize: 10,
+                      ),
+                ),
+              if (expense.time != null && expense.time!.isNotEmpty)
+                Text(
+                  expense.time!,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
             ],
           ),
         ],

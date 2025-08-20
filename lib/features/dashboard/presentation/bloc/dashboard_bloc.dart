@@ -71,11 +71,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         return;
       }
 
-      // Add sample data if no expenses exist
-      if (_expenseBox!.isEmpty) {
-        await _addSampleExpenses();
-      }
-
       // Get dashboard data
       final userName = _dashboardBox!
           .get('userName', defaultValue: 'Shihab Rahman') as String;
@@ -284,70 +279,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   void _onDashboardDataChanged() {
     // Reload dashboard when dashboard settings change
     add(_DashboardDataChangedEvent());
-  }
-
-  Future<void> _addSampleExpenses() async {
-    final now = DateTime.now();
-    final sampleExpenses = [
-      ExpenseEntity(
-        title: 'Groceries',
-        category: 'Manually',
-        amount: 100.00,
-        date: now,
-        iconName: 'shopping_cart',
-        backgroundColor: Color(0xFF6366F1),
-        time: 'Today 12:00 PM',
-      ),
-      ExpenseEntity(
-        title: 'Entertainment',
-        category: 'Manually',
-        amount: 75.00,
-        date: now.subtract(Duration(days: 2)),
-        iconName: 'movie',
-        backgroundColor: Color(0xFFF59E0B),
-        time: '2 days ago',
-      ),
-      ExpenseEntity(
-        title: 'Transportation',
-        category: 'Manually',
-        amount: 50.00,
-        date: now.subtract(Duration(days: 5)),
-        iconName: 'directions_car',
-        backgroundColor: Color(0xFF8B5CF6),
-        time: '5 days ago',
-      ),
-      ExpenseEntity(
-        title: 'Rent',
-        category: 'Manually',
-        amount: 800.00,
-        date: now.subtract(Duration(days: 15)),
-        iconName: 'home',
-        backgroundColor: Color(0xFFF59E0B),
-        time: '2 weeks ago',
-      ),
-      ExpenseEntity(
-        title: 'Coffee',
-        category: 'Manually',
-        amount: 15.00,
-        date: now.subtract(Duration(days: 45)),
-        iconName: 'local_cafe',
-        backgroundColor: Color(0xFF10B981),
-        time: 'Last month',
-      ),
-      ExpenseEntity(
-        title: 'Gas Bill',
-        category: 'Manually',
-        amount: 120.00,
-        date: now.subtract(Duration(days: 60)),
-        iconName: 'local_gas_station',
-        backgroundColor: Color(0xFFEF4444),
-        time: '2 months ago',
-      ),
-    ];
-
-    for (final expense in sampleExpenses) {
-      await _expenseBox!.add(expense);
-    }
   }
 
   @override

@@ -14,6 +14,11 @@ class SubmitButtonSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AddExpenseBloc, AddExpenseState>(
+      buildWhen: (previous, current) {
+        // Only rebuild when submission state changes
+        return (previous is AddExpenseSubmitting) !=
+            (current is AddExpenseSubmitting);
+      },
       builder: (context, state) {
         final isSubmitting = state is AddExpenseSubmitting;
 
@@ -29,6 +34,7 @@ class SubmitButtonSection extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              disabledBackgroundColor: const Color(0xFF3B82F6).withOpacity(0.6),
             ),
             child: isSubmitting
                 ? const SizedBox(

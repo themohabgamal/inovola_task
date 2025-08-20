@@ -5,7 +5,7 @@ import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/core/constants/app_strings.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/widgets/expense_item.dart';
-import 'package:inovola_task/features/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:inovola_task/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 
 class RecentExpensesSection extends StatelessWidget {
   final List<ExpenseEntity> expenses;
@@ -54,7 +54,7 @@ class RecentExpensesSection extends StatelessWidget {
               : RefreshIndicator(
                   onRefresh: () async {
                     // Trigger refresh in the cubit
-                    context.read<DashboardCubit>().refreshDashboard();
+                    context.read<DashboardBloc>().add(DashboardRefreshEvent());
                   },
                   child: ListView.builder(
                     padding:
@@ -70,20 +70,24 @@ class RecentExpensesSection extends StatelessWidget {
                             return await _showDeleteConfirmation(context);
                           },
                           onDismissed: (direction) {
-                            // Delete expense from Hive via cubit
-                            context.read<DashboardCubit>().deleteExpense(index);
+                            final expenseToDelete = expenses[index];
+
+                            context.read<DashboardBloc>().add(
+                                  DashboardDeleteExpenseEvent(expenseToDelete),
+                                );
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Expense deleted'),
-                                backgroundColor: Colors.red,
+                                content: const Text('Expense deleted'),
+                                backgroundColor: AppColors.primary,
                                 action: SnackBarAction(
                                   label: 'Undo',
+                                  textColor: Colors.white,
                                   onPressed: () {
-                                    // You could implement undo functionality here
-                                    context
-                                        .read<DashboardCubit>()
-                                        .refreshDashboard();
+                                    context.read<DashboardBloc>().add(
+                                          DashboardAddExpenseEvent(
+                                              expenseToDelete),
+                                        );
                                   },
                                 ),
                               ),
@@ -265,7 +269,9 @@ class RecentExpensesSection extends StatelessWidget {
                         time: _formatTime(DateTime.now()),
                       );
 
-                      context.read<DashboardCubit>().addExpense(expense);
+                      context
+                          .read<DashboardBloc>()
+                          .add(DashboardAddExpenseEvent(expense));
                       Navigator.pop(context);
 
                       ScaffoldMessenger.of(context).showSnackBar(

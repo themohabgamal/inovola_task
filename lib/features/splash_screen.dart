@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:inovola_task/core/routing/routes.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../../core/constants/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -66,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
                 colors: [
                   AppColors.primary,
                   AppColors.primary.withOpacity(0.8),
-                  AppColors.secondary ?? AppColors.primary.withOpacity(0.7),
+                  AppColors.secondary,
                   AppColors.primary.withOpacity(0.9),
                 ],
               ),

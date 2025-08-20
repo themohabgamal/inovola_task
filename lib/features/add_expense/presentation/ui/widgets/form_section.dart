@@ -30,9 +30,15 @@ class FormSection extends StatefulWidget {
 class _FormSectionState extends State<FormSection> {
   final TextEditingController _receiptController =
       TextEditingController(text: "Upload Image");
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AddExpenseBloc, AddExpenseState>(
+      buildWhen: (previous, current) {
+        // Only rebuild for loading states, not for image picker states
+        return current is AddExpenseLoading ||
+            (previous is AddExpenseLoading && current is! AddExpenseLoading);
+      },
       builder: (context, state) {
         if (state is AddExpenseLoading) {
           return _buildShimmerForm();
@@ -69,55 +75,59 @@ class _FormSectionState extends State<FormSection> {
   }
 
   Widget _buildForm() {
-    return BlocBuilder<AddExpenseBloc, AddExpenseState>(
-      builder: (context, state) {
-        if (state is AddExpenseReceiptPicked) {
-          _receiptController.text = state.receiptName;
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppTextField(
-              controller: widget.titleController,
-              label: "Title",
-              hint: "Enter expense title",
-              validator: (value) => (value == null || value.isEmpty)
-                  ? "Please enter a title"
-                  : null,
-            ),
-            const SizedBox(height: 16),
-            AppTextField(
-              controller: widget.amountController,
-              label: "Amount",
-              hint: "\$0.00",
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
-              ],
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Please enter an amount";
-                }
-                if (double.tryParse(value) == null) {
-                  return "Please enter a valid amount";
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 16.h),
-            AppTextField(
-              controller: TextEditingController(
-                text: DateFormat('MM/dd/yy').format(widget.selectedDate),
-              ),
-              textColor: Colors.grey,
-              label: "Date",
-              readOnly: true,
-              onTap: widget.onDateSelected,
-              suffixIcon: const Icon(Icons.calendar_today, size: 26),
-            ),
-            SizedBox(height: 16.h),
-            AppTextField(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppTextField(
+          controller: widget.titleController,
+          label: "Title",
+          hint: "Enter expense title",
+          validator: (value) =>
+              (value == null || value.isEmpty) ? "Please enter a title" : null,
+        ),
+        const SizedBox(height: 16),
+        AppTextField(
+          controller: widget.amountController,
+          label: "Amount",
+          hint: "\$0.00",
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))
+          ],
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "Please enter an amount";
+            }
+            if (double.tryParse(value) == null) {
+              return "Please enter a valid amount";
+            }
+            return null;
+          },
+        ),
+        SizedBox(height: 16.h),
+        AppTextField(
+          controller: TextEditingController(
+            text: DateFormat('MM/dd/yy').format(widget.selectedDate),
+          ),
+          textColor: Colors.grey,
+          label: "Date",
+          readOnly: true,
+          onTap: widget.onDateSelected,
+          suffixIcon: const Icon(Icons.calendar_today, size: 26),
+        ),
+        SizedBox(height: 16.h),
+        BlocConsumer<AddExpenseBloc, AddExpenseState>(
+          listenWhen: (previous, current) => current is AddExpenseReceiptPicked,
+          buildWhen: (previous, current) => current is AddExpenseReceiptPicked,
+          listener: (context, state) {
+            if (state is AddExpenseReceiptPicked) {
+              setState(() {
+                _receiptController.text = state.receiptName;
+              });
+            }
+          },
+          builder: (context, state) {
+            return AppTextField(
               controller: _receiptController,
               textColor: Colors.grey,
               label: "Attach Receipt",
@@ -126,10 +136,10 @@ class _FormSectionState extends State<FormSection> {
                 context.read<AddExpenseBloc>().add(PickReceiptImage());
               },
               suffixIcon: const Icon(Icons.photo_camera_back, size: 26),
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ],
     );
   }
 }

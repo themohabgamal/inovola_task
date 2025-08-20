@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:inovola_task/core/di/dependency_injection.dart';
 import 'package:inovola_task/core/routing/routes.dart';
-import 'package:inovola_task/core/services/image_picking_service.dart';
-import 'package:inovola_task/features/add_expense/data/repositories/hive_expense_repository.dart';
-import 'package:inovola_task/features/add_expense/domain/usecases/add_expense_usecase.dart';
-import 'package:inovola_task/features/add_expense/domain/usecases/get_categories_usecase.dart';
 import 'package:inovola_task/features/add_expense/presentation/bloc/add_expense_bloc.dart';
 import 'package:inovola_task/features/add_expense/presentation/ui/add_expense_page.dart';
-import 'package:inovola_task/features/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:inovola_task/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:inovola_task/features/splash_screen.dart';
 
@@ -23,7 +20,8 @@ class AppRouter {
       case Routes.dashboardScreen:
         return _buildModernSlideTransitionRoute(
           builder: (_) => BlocProvider(
-            create: (context) => DashboardCubit()..loadDashboardData(),
+            create: (context) =>
+                getIt<DashboardBloc>()..add(DashboardLoadEvent()),
             child: DashboardPage(),
           ),
           settings: settings,
@@ -31,15 +29,12 @@ class AppRouter {
       case Routes.addExpenseScreen:
         return _buildModernSlideTransitionRoute(
           builder: (_) => BlocProvider(
-            create: (context) => AddExpenseBloc(
-                imagePickerService: ImagePickerService(),
-                getCategoriesUseCase:
-                    GetCategoriesUseCase(HiveExpenseRepository()),
-                addExpenseUseCase: AddExpenseUseCase(HiveExpenseRepository())),
-            child: const AddExpensePage(),
+            create: (context) => getIt<AddExpenseBloc>()..getCategoriesUseCase,
+            child: AddExpensePage(),
           ),
           settings: settings,
         );
+
       default:
         return _buildModernSlideTransitionRoute(
           builder: (_) => const Placeholder(),

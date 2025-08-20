@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:inovola_task/core/di/dependency_injection.dart';
 import 'package:inovola_task/core/routing/app_router.dart';
 import 'package:inovola_task/core/routing/routes.dart';
 import 'package:inovola_task/core/services/hive_service.dart';
@@ -9,6 +10,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize Hive
   await HiveService.initHive();
+  // Dependency Injection
+  await initDependencies();
+
   runApp(MyApp());
 }
 

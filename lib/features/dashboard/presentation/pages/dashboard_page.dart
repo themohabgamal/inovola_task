@@ -4,14 +4,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/views/dashboard_error_view.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/views/dashboard_success_view.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/widgets/bottom_navigation.dart';
-import '../cubit/dashboard_cubit.dart';
+import '../bloc/dashboard_bloc.dart';
 import 'views/dashboard_loading_view.dart';
 
 class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<DashboardCubit, DashboardState>(
+      body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
             return const DashboardLoadingView();

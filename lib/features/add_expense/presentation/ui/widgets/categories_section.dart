@@ -30,6 +30,11 @@ class CategoriesSection extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         BlocBuilder<AddExpenseBloc, AddExpenseState>(
+          buildWhen: (previous, current) =>
+              current is AddExpenseCategoriesLoaded ||
+              current is AddExpenseSubmitting ||
+              current is AddExpenseSuccess ||
+              current is AddExpenseFailure,
           builder: (context, state) {
             if (state is AddExpenseLoading) {
               return const ShimmerCategoryGrid();
@@ -52,7 +57,7 @@ class CategoriesSection extends StatelessWidget {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 childAspectRatio: 0.8,
-                crossAxisSpacing: 16,
+                crossAxisSpacing: 8,
                 mainAxisSpacing: 4,
               ),
               itemCount: categories.length + 1,
@@ -68,8 +73,8 @@ class CategoriesSection extends StatelessWidget {
                     child: Column(
                       children: [
                         Container(
-                          width: 60,
-                          height: 60,
+                          width: 50.w,
+                          height: 50.h,
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
                             borderRadius: BorderRadius.circular(30),

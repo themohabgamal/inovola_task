@@ -6,20 +6,33 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/dashboard_entity.dart';
 
+part 'dashboard_event.dart';
 part 'dashboard_state.dart';
 
-class DashboardCubit extends Cubit<DashboardState> {
+class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   static const String _expensesBoxName = 'expenses_box';
   static const String _dashboardBoxName = 'dashboard_box';
 
   Box<ExpenseEntity>? _expenseBox;
   Box? _dashboardBox;
 
-  DashboardCubit() : super(DashboardInitial()) {
-    _initializeHive();
+  DashboardBloc() : super(DashboardInitial()) {
+    on<DashboardInitializeEvent>(_onInitialize);
+    on<DashboardLoadEvent>(_onLoadDashboard);
+    on<DashboardAddExpenseEvent>(_onAddExpense);
+    on<DashboardUpdateInfoEvent>(_onUpdateInfo);
+    on<DashboardDeleteExpenseEvent>(_onDeleteExpense);
+    on<DashboardRefreshEvent>(_onRefresh);
+    on<_DashboardDataChangedEvent>(_onDataChanged);
+
+    // Initialize automatically
+    add(DashboardInitializeEvent());
   }
 
-  Future<void> _initializeHive() async {
+  Future<void> _onInitialize(
+    DashboardInitializeEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
     try {
       emit(DashboardLoading());
 
@@ -36,31 +49,24 @@ class DashboardCubit extends Cubit<DashboardState> {
         _dashboardBox = Hive.box(_dashboardBoxName);
       }
 
-      // Listen to expense box changes
+      // Listen to box changes
       _expenseBox?.listenable().addListener(_onExpenseDataChanged);
       _dashboardBox?.listenable().addListener(_onDashboardDataChanged);
 
       // Load initial data
-      await loadDashboardData();
+      add(DashboardLoadEvent());
     } catch (e) {
       emit(DashboardError('Failed to initialize dashboard: ${e.toString()}'));
     }
   }
 
-  void _onExpenseDataChanged() {
-    // Reload dashboard when expenses change
-    loadDashboardData();
-  }
-
-  void _onDashboardDataChanged() {
-    // Reload dashboard when dashboard settings change
-    loadDashboardData();
-  }
-
-  Future<void> loadDashboardData() async {
+  Future<void> _onLoadDashboard(
+    DashboardLoadEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
     try {
       if (_expenseBox == null || _dashboardBox == null) {
-        await _initializeHive();
+        add(DashboardInitializeEvent());
         return;
       }
 
@@ -98,6 +104,95 @@ class DashboardCubit extends Cubit<DashboardState> {
     } catch (e) {
       emit(DashboardError('Failed to load dashboard data: ${e.toString()}'));
     }
+  }
+
+  Future<void> _onAddExpense(
+    DashboardAddExpenseEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    try {
+      if (_expenseBox == null) {
+        add(DashboardInitializeEvent());
+        return;
+      }
+
+      await _expenseBox!.add(event.expense);
+      // Dashboard will automatically reload due to listener
+    } catch (e) {
+      emit(DashboardError('Failed to add expense: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onUpdateInfo(
+    DashboardUpdateInfoEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    try {
+      if (_dashboardBox == null) {
+        add(DashboardInitializeEvent());
+        return;
+      }
+
+      if (event.userName != null) {
+        await _dashboardBox!.put('userName', event.userName);
+      }
+      if (event.income != null) {
+        await _dashboardBox!.put('income', event.income);
+      }
+      // Dashboard will automatically reload due to listener
+    } catch (e) {
+      emit(DashboardError('Failed to update dashboard: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onDeleteExpense(
+    DashboardDeleteExpenseEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    try {
+      if (_expenseBox == null) {
+        add(DashboardInitializeEvent());
+        return;
+      }
+
+      // Find the Hive key of the expense
+      final key = _expenseBox!.keys.firstWhere(
+        (k) => _expenseBox!.get(k) == event.expense,
+        orElse: () => null,
+      );
+
+      if (key != null) {
+        await _expenseBox!.delete(key);
+      }
+
+      // No need to manually emit, listener will trigger DashboardLoadEvent
+    } catch (e) {
+      emit(DashboardError('Failed to delete expense: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onRefresh(
+    DashboardRefreshEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    add(DashboardLoadEvent());
+  }
+
+  Future<void> _onDataChanged(
+    _DashboardDataChangedEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    add(DashboardLoadEvent());
+  }
+
+  void _onExpenseDataChanged() {
+    // Reload dashboard when expenses change
+    add(_DashboardDataChangedEvent());
+  }
+
+  void _onDashboardDataChanged() {
+    // Reload dashboard when dashboard settings change
+    add(_DashboardDataChangedEvent());
   }
 
   Future<void> _addSampleExpenses() async {
@@ -143,57 +238,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     for (final expense in sampleExpenses) {
       await _expenseBox!.add(expense);
     }
-  }
-
-  Future<void> addExpense(ExpenseEntity expense) async {
-    try {
-      if (_expenseBox == null) {
-        await _initializeHive();
-        return;
-      }
-
-      await _expenseBox!.add(expense);
-      // Dashboard will automatically reload due to listener
-    } catch (e) {
-      emit(DashboardError('Failed to add expense: ${e.toString()}'));
-    }
-  }
-
-  Future<void> updateDashboardInfo({
-    String? userName,
-    double? income,
-  }) async {
-    try {
-      if (_dashboardBox == null) {
-        await _initializeHive();
-        return;
-      }
-
-      if (userName != null) {
-        await _dashboardBox!.put('userName', userName);
-      }
-      if (income != null) {
-        await _dashboardBox!.put('income', income);
-      }
-      // Dashboard will automatically reload due to listener
-    } catch (e) {
-      emit(DashboardError('Failed to update dashboard: ${e.toString()}'));
-    }
-  }
-
-  Future<void> deleteExpense(int index) async {
-    try {
-      if (_expenseBox == null) return;
-
-      await _expenseBox!.deleteAt(index);
-      // Dashboard will automatically reload due to listener
-    } catch (e) {
-      emit(DashboardError('Failed to delete expense: ${e.toString()}'));
-    }
-  }
-
-  Future<void> refreshDashboard() async {
-    await loadDashboardData();
   }
 
   @override

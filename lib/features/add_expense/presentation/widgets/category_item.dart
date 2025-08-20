@@ -22,8 +22,8 @@ class CategoryItem extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 50.w,
+            height: 50.h,
             decoration: BoxDecoration(
               color: isSelected
                   ? Color(int.parse(category.color))
@@ -37,7 +37,7 @@ class CategoryItem extends StatelessWidget {
             child: Center(
               child: Text(
                 category.icon,
-                style: const TextStyle(fontSize: 24),
+                style: const TextStyle(fontSize: 22),
               ),
             ),
           ),

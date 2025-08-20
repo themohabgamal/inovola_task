@@ -17,7 +17,6 @@ class AddExpensePage extends StatelessWidget {
       body: BlocListener<AddExpenseBloc, AddExpenseState>(
         listener: (context, state) {
           if (state is AddExpenseSuccess) {
-            AppToasts.showSuccess(context, 'Expense added successfully!');
             Navigator.pop(context);
           } else if (state is AddExpenseFailure) {
             AppToasts.showError(context, state.error);

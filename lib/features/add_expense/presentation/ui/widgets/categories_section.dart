@@ -51,62 +51,66 @@ class CategoriesSection extends StatelessWidget {
               categories = state.categories;
             }
 
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.8,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 4,
-              ),
-              itemCount: categories.length + 1,
-              itemBuilder: (context, index) {
-                if (index == categories.length) {
-                  return GestureDetector(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Add Category feature coming soon!')),
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 50.w,
-                          height: 50.h,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(30),
-                            border: Border.all(
-                                color: AppColors.primary,
-                                width: 2,
-                                style: BorderStyle.solid),
+            return SizedBox(
+              height: 200.h,
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.8,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 4,
+                ),
+                itemCount: categories.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == categories.length) {
+                    return GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Add Category feature coming soon!')),
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 50.w,
+                            height: 50.h,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                  color: AppColors.primary,
+                                  width: 2,
+                                  style: BorderStyle.solid),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              size: 24,
+                              color: AppColors.primary,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.add,
-                            size: 24,
-                            color: AppColors.primary,
+                          SizedBox(height: 12.h),
+                          Text(
+                            'Add Category',
+                            style: AppTextStyles.font10Weight500Black,
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          'Add Category',
-                          style: AppTextStyles.font10Weight500Black,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                        ],
+                      ),
+                    );
+                  }
 
-                final category = categories[index];
-                return CategoryItem(
-                  category: category,
-                  isSelected: selectedCategory?.name == category.name,
-                  onTap: () => onCategorySelected(category),
-                );
-              },
+                  final category = categories[index];
+                  return CategoryItem(
+                    category: category,
+                    isSelected: selectedCategory?.name == category.name,
+                    onTap: () => onCategorySelected(category),
+                  );
+                },
+              ),
             );
           },
         ),

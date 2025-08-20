@@ -6,6 +6,7 @@ class DashboardEntity {
   final double income;
   final double expenses;
   final List<ExpenseEntity> recentExpenses;
+  final String currentFilter;
 
   DashboardEntity({
     required this.userName,
@@ -13,5 +14,6 @@ class DashboardEntity {
     required this.income,
     required this.expenses,
     required this.recentExpenses,
+    this.currentFilter = 'This Month',
   });
 }

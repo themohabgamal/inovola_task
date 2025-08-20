@@ -41,7 +41,7 @@ class ExpenseEntityAdapter extends TypeAdapter<ExpenseEntity> {
       ..writeByte(4)
       ..write(obj.iconName)
       ..writeByte(5)
-      ..write(obj._backgroundColorHex)
+      ..write(obj.backgroundColorHex)
       ..writeByte(6)
       ..write(obj.time);
   }

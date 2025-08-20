@@ -29,7 +29,10 @@ class DashboardHeader extends StatelessWidget {
           ),
           child: Column(
             children: [
-              HeaderSection(userName: dashboard.userName)
+              HeaderSection(
+                userName: dashboard.userName,
+                selectedPeriod: dashboard.currentFilter,
+              )
                   .animate()
                   .slideY(
                       begin: -0.5, duration: 600.ms, curve: Curves.easeOutBack)

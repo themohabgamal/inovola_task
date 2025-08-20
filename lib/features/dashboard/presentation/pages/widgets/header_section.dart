@@ -1,15 +1,24 @@
+// lib/features/dashboard/presentation/pages/widgets/header_section.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/core/constants/app_strings.dart';
+import 'package:inovola_task/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/widgets/time_period_drop_down.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/widgets/user_avatar.dart';
 
 class HeaderSection extends StatelessWidget {
   final String userName;
+  final String selectedPeriod; // Add this parameter
 
-  const HeaderSection({Key? key, required this.userName}) : super(key: key);
+  const HeaderSection({
+    Key? key,
+    required this.userName,
+    required this.selectedPeriod, // Make it required
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +51,14 @@ class HeaderSection extends StatelessWidget {
               ],
             ),
           ),
-          TimePeriodDropdown()
+          TimePeriodDropdown(
+            selectedPeriod: selectedPeriod, // Use the new parameter
+            onPeriodChanged: (String newFilter) {
+              context.read<DashboardBloc>().add(
+                    DashboardFilterChangedEvent(newFilter),
+                  );
+            },
+          )
         ],
       ),
     );

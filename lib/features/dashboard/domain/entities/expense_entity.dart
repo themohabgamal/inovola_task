@@ -20,9 +20,8 @@ class ExpenseEntity extends HiveObject {
   @HiveField(4)
   final String? iconName;
 
-  // Stored as int for Hive
   @HiveField(5)
-  final int? _backgroundColorHex;
+  final int backgroundColorHex;
 
   @HiveField(6)
   final String? time;
@@ -35,8 +34,8 @@ class ExpenseEntity extends HiveObject {
     this.iconName,
     Color? backgroundColor,
     this.time,
-  }) : _backgroundColorHex = backgroundColor?.value;
+  }) : backgroundColorHex = backgroundColor?.value ?? Colors.grey.value;
 
-  Color get backgroundColor =>
-      _backgroundColorHex != null ? Color(_backgroundColorHex) : Colors.grey;
+  /// Getter to convert stored int back into a Flutter [Color]
+  Color get backgroundColor => Color(backgroundColorHex);
 }

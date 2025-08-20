@@ -8,6 +8,7 @@ import 'package:inovola_task/features/add_expense/presentation/bloc/add_expense_
 import 'package:inovola_task/features/add_expense/presentation/bloc/add_expense_state.dart';
 import 'package:inovola_task/features/add_expense/presentation/widgets/shimmer_widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 
 class FormSection extends StatefulWidget {
   final TextEditingController titleController;
@@ -30,6 +31,51 @@ class FormSection extends StatefulWidget {
 class _FormSectionState extends State<FormSection> {
   final TextEditingController _receiptController =
       TextEditingController(text: "Upload Image");
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1800,
+        maxHeight: 1800,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        // Get just the filename for display
+        String fileName = image.path.split('/').last;
+
+        // Update the text field with the selected image name
+        setState(() {
+          _receiptController.text = fileName;
+        });
+
+        // Trigger the existing BLoC event with the image name
+        // This maintains compatibility with your existing BLoC logic
+        context.read<AddExpenseBloc>().add(PickReceiptImage());
+      }
+    } catch (e) {
+      // Handle any errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Error selecting image'),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,9 +178,7 @@ class _FormSectionState extends State<FormSection> {
               textColor: Colors.grey,
               label: "Attach Receipt",
               readOnly: true,
-              onTap: () {
-                context.read<AddExpenseBloc>().add(PickReceiptImage());
-              },
+              onTap: _pickImageFromGallery, // Changed to use real image picker
               suffixIcon: const Icon(Icons.photo_camera_back, size: 26),
             );
           },

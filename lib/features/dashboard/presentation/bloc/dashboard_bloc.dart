@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:bloc/bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -15,6 +14,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
   Box<ExpenseEntity>? _expenseBox;
   Box? _dashboardBox;
+  String _currentFilter = 'This Month'; // Default filter
 
   DashboardBloc() : super(DashboardInitial()) {
     on<DashboardInitializeEvent>(_onInitialize);
@@ -23,6 +23,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<DashboardUpdateInfoEvent>(_onUpdateInfo);
     on<DashboardDeleteExpenseEvent>(_onDeleteExpense);
     on<DashboardRefreshEvent>(_onRefresh);
+    on<DashboardFilterChangedEvent>(_onFilterChanged);
     on<_DashboardDataChangedEvent>(_onDataChanged);
 
     // Initialize automatically
@@ -81,28 +82,118 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final income =
           _dashboardBox!.get('income', defaultValue: 10840.00) as double;
 
-      // Get all expenses and calculate totals
+      // Get all expenses and filter them
       final allExpenses = _expenseBox!.values.toList();
+      final filteredExpenses = _filterExpenses(allExpenses, _currentFilter);
+
+      // Calculate totals based on all expenses (not filtered)
       final totalExpenses =
           allExpenses.fold<double>(0.0, (sum, expense) => sum + expense.amount);
       final totalBalance = income - totalExpenses;
 
-      // Get recent expenses (sorted by date, newest first)
-      final sortedExpenses = List<ExpenseEntity>.from(allExpenses);
-      sortedExpenses.sort((a, b) => b.date.compareTo(a.date));
-      final recentExpenses = sortedExpenses.take(10).toList();
+      // Sort filtered expenses by date (most recent first)
+      filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
 
       final dashboard = DashboardEntity(
         userName: userName,
         totalBalance: totalBalance,
         income: income,
         expenses: totalExpenses,
-        recentExpenses: recentExpenses,
+        recentExpenses: filteredExpenses,
+        currentFilter: _currentFilter, // Add current filter to dashboard entity
       );
 
       emit(DashboardLoaded(dashboard));
     } catch (e) {
       emit(DashboardError('Failed to load dashboard data: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onFilterChanged(
+    DashboardFilterChangedEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    _currentFilter = event.filter;
+    add(DashboardLoadEvent());
+  }
+
+  List<ExpenseEntity> _filterExpenses(
+      List<ExpenseEntity> expenses, String filter) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    switch (filter) {
+      case 'This Month':
+        final firstDayOfMonth = DateTime(now.year, now.month, 1);
+        return expenses
+            .where((expense) => expense.date
+                .isAfter(firstDayOfMonth.subtract(Duration(days: 1))))
+            .toList();
+
+      case 'Last Month':
+        final firstDayOfLastMonth = DateTime(now.year, now.month - 1, 1);
+        final lastDayOfLastMonth = DateTime(now.year, now.month, 0);
+        return expenses
+            .where((expense) =>
+                expense.date
+                    .isAfter(firstDayOfLastMonth.subtract(Duration(days: 1))) &&
+                expense.date
+                    .isBefore(lastDayOfLastMonth.add(Duration(days: 1))))
+            .toList();
+
+      case 'Last 7 Days':
+        final sevenDaysAgo = today.subtract(Duration(days: 7));
+        return expenses
+            .where((expense) =>
+                expense.date.isAfter(sevenDaysAgo.subtract(Duration(days: 1))))
+            .toList();
+
+      case 'This Quarter':
+        final currentQuarter = ((now.month - 1) ~/ 3) + 1;
+        final firstMonthOfQuarter = (currentQuarter - 1) * 3 + 1;
+        final firstDayOfQuarter = DateTime(now.year, firstMonthOfQuarter, 1);
+        return expenses
+            .where((expense) => expense.date
+                .isAfter(firstDayOfQuarter.subtract(Duration(days: 1))))
+            .toList();
+
+      case 'Last Quarter':
+        final currentQuarter = ((now.month - 1) ~/ 3) + 1;
+        final lastQuarter = currentQuarter > 1 ? currentQuarter - 1 : 4;
+        final year = currentQuarter > 1 ? now.year : now.year - 1;
+        final firstMonthOfLastQuarter = (lastQuarter - 1) * 3 + 1;
+        final lastMonthOfLastQuarter = lastQuarter * 3;
+        final firstDayOfLastQuarter =
+            DateTime(year, firstMonthOfLastQuarter, 1);
+        final lastDayOfLastQuarter =
+            DateTime(year, lastMonthOfLastQuarter + 1, 0);
+        return expenses
+            .where((expense) =>
+                expense.date.isAfter(
+                    firstDayOfLastQuarter.subtract(Duration(days: 1))) &&
+                expense.date
+                    .isBefore(lastDayOfLastQuarter.add(Duration(days: 1))))
+            .toList();
+
+      case 'This Year':
+        final firstDayOfYear = DateTime(now.year, 1, 1);
+        return expenses
+            .where((expense) => expense.date
+                .isAfter(firstDayOfYear.subtract(Duration(days: 1))))
+            .toList();
+
+      case 'Last Year':
+        final firstDayOfLastYear = DateTime(now.year - 1, 1, 1);
+        final lastDayOfLastYear = DateTime(now.year - 1, 12, 31);
+        return expenses
+            .where((expense) =>
+                expense.date
+                    .isAfter(firstDayOfLastYear.subtract(Duration(days: 1))) &&
+                expense.date.isBefore(lastDayOfLastYear.add(Duration(days: 1))))
+            .toList();
+
+      default:
+        return expenses;
     }
   }
 
@@ -196,12 +287,13 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }
 
   Future<void> _addSampleExpenses() async {
+    final now = DateTime.now();
     final sampleExpenses = [
       ExpenseEntity(
         title: 'Groceries',
         category: 'Manually',
         amount: 100.00,
-        date: DateTime.now(),
+        date: now,
         iconName: 'shopping_cart',
         backgroundColor: Color(0xFF6366F1),
         time: 'Today 12:00 PM',
@@ -209,29 +301,47 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       ExpenseEntity(
         title: 'Entertainment',
         category: 'Manually',
-        amount: 100.00,
-        date: DateTime.now().subtract(Duration(hours: 2)),
+        amount: 75.00,
+        date: now.subtract(Duration(days: 2)),
         iconName: 'movie',
         backgroundColor: Color(0xFFF59E0B),
-        time: 'Today 10:00 AM',
+        time: '2 days ago',
       ),
       ExpenseEntity(
         title: 'Transportation',
         category: 'Manually',
-        amount: 100.00,
-        date: DateTime.now().subtract(Duration(hours: 5)),
+        amount: 50.00,
+        date: now.subtract(Duration(days: 5)),
         iconName: 'directions_car',
         backgroundColor: Color(0xFF8B5CF6),
-        time: 'Today 7:00 AM',
+        time: '5 days ago',
       ),
       ExpenseEntity(
         title: 'Rent',
         category: 'Manually',
-        amount: 100.00,
-        date: DateTime.now().subtract(Duration(days: 1)),
+        amount: 800.00,
+        date: now.subtract(Duration(days: 15)),
         iconName: 'home',
         backgroundColor: Color(0xFFF59E0B),
-        time: 'Yesterday 9:00 AM',
+        time: '2 weeks ago',
+      ),
+      ExpenseEntity(
+        title: 'Coffee',
+        category: 'Manually',
+        amount: 15.00,
+        date: now.subtract(Duration(days: 45)),
+        iconName: 'local_cafe',
+        backgroundColor: Color(0xFF10B981),
+        time: 'Last month',
+      ),
+      ExpenseEntity(
+        title: 'Gas Bill',
+        category: 'Manually',
+        amount: 120.00,
+        date: now.subtract(Duration(days: 60)),
+        iconName: 'local_gas_station',
+        backgroundColor: Color(0xFFEF4444),
+        time: '2 months ago',
       ),
     ];
 

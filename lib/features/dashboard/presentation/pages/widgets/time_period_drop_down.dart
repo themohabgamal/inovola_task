@@ -20,14 +20,14 @@ class _TimePeriodDropdownState extends State<TimePeriodDropdown> {
   OverlayEntry? _overlayEntry;
   bool _isOpen = false;
 
-  final List<String> _timePeriods = [
-    'This Month',
-    'Last Month',
-    'This Quarter',
-    'Last Quarter',
-    'This Year',
-    'Last Year',
-    'Custom Range',
+  final List<Map<String, dynamic>> _timePeriods = [
+    {'name': 'Last 7 Days', 'icon': Icons.today_outlined},
+    {'name': 'This Month', 'icon': Icons.calendar_month_outlined},
+    {'name': 'Last Month', 'icon': Icons.calendar_today_outlined},
+    {'name': 'This Quarter', 'icon': Icons.date_range_outlined},
+    {'name': 'Last Quarter', 'icon': Icons.date_range_outlined},
+    {'name': 'This Year', 'icon': Icons.calendar_month},
+    {'name': 'Last Year', 'icon': Icons.history},
   ];
 
   late String _selectedPeriod;
@@ -36,6 +36,17 @@ class _TimePeriodDropdownState extends State<TimePeriodDropdown> {
   void initState() {
     super.initState();
     _selectedPeriod = widget.selectedPeriod ?? 'This Month';
+  }
+
+  @override
+  void didUpdateWidget(TimePeriodDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedPeriod != null &&
+        widget.selectedPeriod != _selectedPeriod) {
+      setState(() {
+        _selectedPeriod = widget.selectedPeriod!;
+      });
+    }
   }
 
   @override
@@ -53,130 +64,54 @@ class _TimePeriodDropdownState extends State<TimePeriodDropdown> {
   }
 
   void _openDropdown() {
-    _isOpen = true;
+    setState(() {
+      _isOpen = true;
+    });
     _showOverlay();
   }
 
   void _closeDropdown() {
-    _isOpen = false;
+    setState(() {
+      _isOpen = false;
+    });
     _removeOverlay();
   }
 
   void _showOverlay() {
-    final RenderBox? renderBox =
+    final renderBox =
         _buttonKey.currentContext?.findRenderObject() as RenderBox?;
-
     if (renderBox == null) return;
 
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
 
-    // Get screen dimensions
-    final screenSize = MediaQuery.of(context).size;
-
-    // Calculate dropdown width and position
-    double dropdownWidth = size.width.clamp(160.w, 200.w);
-    double leftPosition = offset.dx;
-
-    // Ensure dropdown doesn't go off screen
-    if (leftPosition + dropdownWidth > screenSize.width) {
-      leftPosition = screenSize.width - dropdownWidth - 16.w;
-    }
-
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        left: 0,
-        top: 0,
-        width: screenSize.width,
-        height: screenSize.height,
-        child: GestureDetector(
-          onTap: _closeDropdown,
-          child: Container(
-            color: Colors.transparent,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: leftPosition,
-                  top: offset.dy + size.height + 8.h,
-                  width: dropdownWidth,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: _timePeriods.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final period = entry.value;
-                          final isSelected = period == _selectedPeriod;
-                          final isFirst = index == 0;
-                          final isLast = index == _timePeriods.length - 1;
-
-                          return InkWell(
-                            onTap: () => _selectPeriod(period),
-                            borderRadius: BorderRadius.vertical(
-                              top:
-                                  isFirst ? Radius.circular(12.r) : Radius.zero,
-                              bottom:
-                                  isLast ? Radius.circular(12.r) : Radius.zero,
-                            ),
-                            child: Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 12.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.blue.shade50
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.vertical(
-                                  top: isFirst
-                                      ? Radius.circular(12.r)
-                                      : Radius.zero,
-                                  bottom: isLast
-                                      ? Radius.circular(12.r)
-                                      : Radius.zero,
-                                ),
-                              ),
-                              child: Text(
-                                period,
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.blue.shade700
-                                      : Colors.black87,
-                                  fontSize: 14.sp,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        left: offset.dx,
+        top: offset.dy + size.height + 8,
+        width: 220,
+        child: Material(
+          elevation: 8,
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _timePeriods.map((period) {
+              final isSelected = period['name'] == _selectedPeriod;
+              return ListTile(
+                leading: Icon(period['icon'],
+                    color: isSelected ? Colors.blue : Colors.grey),
+                title: Text(period['name']),
+                trailing:
+                    isSelected ? Icon(Icons.check, color: Colors.blue) : null,
+                onTap: () => _selectPeriod(period['name']),
+              );
+            }).toList(),
           ),
         ),
       ),
     );
 
-    Overlay.of(context).insert(_overlayEntry!);
+    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
   }
 
   void _removeOverlay() {
@@ -199,19 +134,24 @@ class _TimePeriodDropdownState extends State<TimePeriodDropdown> {
       child: InkWell(
         key: _buttonKey,
         onTap: _toggleDropdown,
-        borderRadius: BorderRadius.circular(8.r),
-        child: Container(
+        borderRadius: BorderRadius.circular(12.r),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           padding: EdgeInsets.symmetric(
-            horizontal: 12.w,
-            vertical: 8.h,
+            horizontal: 16.w,
+            vertical: 10.h,
           ),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8.r),
+            color: _isOpen ? Colors.blue.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: _isOpen ? Colors.blue.shade200 : Colors.grey[300]!,
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
-                blurRadius: 4,
+                blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -222,17 +162,21 @@ class _TimePeriodDropdownState extends State<TimePeriodDropdown> {
               Text(
                 _selectedPeriod,
                 style: TextStyle(
-                  color: Colors.black87,
+                  color: _isOpen ? Colors.blue.shade700 : Colors.black87,
                   fontSize: 12.sp,
-                  letterSpacing: 0.8,
+                  letterSpacing: 0.5,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               SizedBox(width: 8.w),
-              Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.black87,
-                size: 16.sp,
+              AnimatedRotation(
+                duration: const Duration(milliseconds: 200),
+                turns: _isOpen ? 0.5 : 0,
+                child: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: _isOpen ? Colors.blue.shade600 : Colors.grey[600],
+                  size: 18.sp,
+                ),
               ),
             ],
           ),

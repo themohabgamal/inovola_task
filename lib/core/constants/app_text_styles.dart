@@ -11,6 +11,7 @@ class AppTextStyles {
   // Base colors
   static const Color _blackColor = Colors.black;
   static const Color _whiteColor = Colors.white;
+  static const Color _greyColor = Colors.grey;
 
   // ==================== FONT SIZE 32 ====================
 
@@ -289,7 +290,13 @@ class AppTextStyles {
       font16Weight700Black.copyWith(color: _whiteColor);
 
   // ==================== FONT SIZE 14 ====================
-
+  static TextStyle get font14Weight400Grey => TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w400,
+        color: _greyColor,
+        height: 1.5,
+      );
   static TextStyle get font14Weight400Black => TextStyle(
         fontFamily: _fontFamily,
         fontSize: 14.sp,
@@ -341,6 +348,13 @@ class AppTextStyles {
         fontSize: 12.sp,
         fontWeight: FontWeight.w400,
         color: _blackColor,
+        height: 1.5,
+      );
+  static TextStyle get font12Weight400Grey => TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 12.sp,
+        fontWeight: FontWeight.w400,
+        color: _greyColor,
         height: 1.5,
       );
 

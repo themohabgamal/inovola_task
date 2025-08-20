@@ -18,6 +18,7 @@ dependencies:
   get_it: ^7.6.0
   # Network
   cached_network_image: ^3.4.1
+  dio: ^5.9.0
   # UI
   flutter_svg: ^2.2.0
   shimmer: ^3.0.0

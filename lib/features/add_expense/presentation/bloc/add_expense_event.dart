@@ -28,7 +28,7 @@ class AddExpense extends AddExpenseEvent {
   final String category;
   final double amount;
   final String currency;
-  final double convertedAmount; // Amount in USD
+  final double convertedAmount;
   final double exchangeRate;
   final DateTime date;
   final String? iconName;

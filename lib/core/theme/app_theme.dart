@@ -1,39 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/app_colors.dart';
+import '../constants/app_text_styles.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.backgroundColor,
-      fontFamily: 'SF Pro Display',
+      fontFamily: 'Poppins',
       textTheme: TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 32.sp,
-          fontWeight: FontWeight.bold,
-          color: AppColors.white,
-        ),
-        displayMedium: TextStyle(
-          fontSize: 24.sp,
-          fontWeight: FontWeight.bold,
-          color: AppColors.black,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w500,
-          color: AppColors.black,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.normal,
-          color: AppColors.grey,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.normal,
-          color: AppColors.grey,
-        ),
+        displayLarge: AppTextStyles.font32Weight700White,
+        displayMedium: AppTextStyles.font24Weight700Black,
+        bodyLarge: AppTextStyles.font16Weight500Black,
+        bodyMedium: AppTextStyles.font14Weight400Grey,
+        bodySmall: AppTextStyles.font12Weight400Grey,
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,

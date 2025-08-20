@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/core/constants/app_strings.dart';
+import 'package:inovola_task/core/routing/routes.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/widgets/empty_state.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/widgets/expense_list.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/add_expense_dialog.dart';
 
 class RecentExpensesSection extends StatelessWidget {
   final List<ExpenseEntity> expenses;
@@ -50,7 +50,7 @@ class RecentExpensesSection extends StatelessWidget {
         Expanded(
           child: expenses.isEmpty
               ? EmptyState(onAddPressed: () {
-                  showAddExpenseDialog(context);
+                  Navigator.pushNamed(context, Routes.addExpenseScreen);
                 })
               : ExpenseList(expenses: expenses),
         ),

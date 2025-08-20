@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-// In your form_section.dart file, update the widget to include currency selection
+// lib/features/add_expense/presentation/widgets/form_section.dart
 class FormSection extends StatelessWidget {
   final TextEditingController titleController;
   final TextEditingController amountController;
@@ -13,6 +13,8 @@ class FormSection extends StatelessWidget {
   final String selectedCurrency;
   final Function(String) onCurrencyChanged;
   final List<String> currencyOptions;
+  final VoidCallback onAmountChanged;
+  final bool isLoadingRates; // Add this
 
   const FormSection({
     Key? key,
@@ -23,6 +25,8 @@ class FormSection extends StatelessWidget {
     required this.selectedCurrency,
     required this.onCurrencyChanged,
     required this.currencyOptions,
+    required this.onAmountChanged,
+    required this.isLoadingRates, // Add this
   }) : super(key: key);
 
   @override
@@ -63,6 +67,7 @@ class FormSection extends StatelessWidget {
                   border: OutlineInputBorder(),
                   prefixText: selectedCurrency != 'USD' ? '' : '\$',
                 ),
+                onChanged: (value) => onAmountChanged(),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an amount';
@@ -77,24 +82,26 @@ class FormSection extends StatelessWidget {
             SizedBox(width: 16.w),
             Expanded(
               flex: 1,
-              child: DropdownButtonFormField<String>(
-                value: selectedCurrency,
-                items: currencyOptions
-                    .map((currency) => DropdownMenuItem(
-                          value: currency,
-                          child: Text(currency),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    onCurrencyChanged(value);
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: 'Currency',
-                  border: OutlineInputBorder(),
-                ),
-              ),
+              child: isLoadingRates
+                  ? _buildLoadingCurrencyDropdown()
+                  : DropdownButtonFormField<String>(
+                      value: selectedCurrency,
+                      items: currencyOptions
+                          .map((currency) => DropdownMenuItem(
+                                value: currency,
+                                child: Text(currency),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          onCurrencyChanged(value);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Currency',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
             ),
           ],
         ),
@@ -121,6 +128,31 @@ class FormSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLoadingCurrencyDropdown() {
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: 'Currency',
+        border: OutlineInputBorder(),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Loading currencies...',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ),
+          SizedBox(width: 8),
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ],
+      ),
     );
   }
 }

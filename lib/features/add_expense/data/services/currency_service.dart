@@ -1,30 +1,50 @@
-// lib/features/add_expense/data/services/currency_service.dart
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'currency_api.dart';
+import 'currency_cache.dart';
+import 'currency_fallback.dart';
 
 class CurrencyService {
-  static const String _apiKey = 'f66d31fedcd3cf8a7e6d30c7';
-  static const String _baseUrl = 'https://v6.exchangerate-api.com/v6';
+  static Future<Map<String, double>> getConversionRates() async {
+    if (CurrencyCache.isValid) {
+      return CurrencyCache.rates;
+    }
 
-  Future<Map<String, dynamic>> getExchangeRates(String baseCurrency) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/$_apiKey/latest/$baseCurrency'),
-        headers: {'Accept': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        throw Exception(
-            'Failed to load exchange rates: ${response.statusCode}');
-      }
+      final rates = await CurrencyApi.fetchRates();
+      CurrencyCache.update(rates);
+      return rates;
     } catch (e) {
-      throw Exception('Failed to load exchange rates: $e');
+      return CurrencyFallback.getRates();
     }
   }
 
-  double convertAmount(double amount, double exchangeRate) {
-    return amount * exchangeRate;
+  static Future<double> convertToUSD(double amount, String fromCurrency) async {
+    final rates = await getConversionRates();
+
+    if (fromCurrency == 'USD') return amount;
+    final rate = rates[fromCurrency];
+
+    if (rate == null) {
+      return CurrencyFallback.convertToUSD(amount, fromCurrency);
+    }
+
+    return amount / rate;
+  }
+
+  static Future<double> convertFromUSD(double amount, String toCurrency) async {
+    final rates = await getConversionRates();
+
+    if (toCurrency == 'USD') return amount;
+    final rate = rates[toCurrency];
+
+    if (rate == null) {
+      return CurrencyFallback.convertFromUSD(amount, toCurrency);
+    }
+
+    return amount * rate;
+  }
+
+  static Future<List<String>> getAvailableCurrencies() async {
+    final rates = await getConversionRates();
+    return rates.keys.toList();
   }
 }

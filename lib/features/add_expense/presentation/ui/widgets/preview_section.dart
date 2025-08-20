@@ -2,100 +2,120 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/features/add_expense/domain/entities/category_entity.dart';
 
-// In your preview_section.dart file
+import '../utility/category_utils.dart';
+import '../utility/date_time_utils.dart';
+
 class PreviewSection extends StatelessWidget {
   final TextEditingController titleController;
   final TextEditingController amountController;
-  final CategoryEntity? selectedCategory;
+  final CategoryEntity selectedCategory;
   final DateTime selectedDate;
   final String selectedCurrency;
-  final double conversionRate;
-  final String Function(DateTime) formatTime;
+  final double? convertedAmount;
 
   const PreviewSection({
-    Key? key,
+    super.key,
     required this.titleController,
     required this.amountController,
     required this.selectedCategory,
     required this.selectedDate,
     required this.selectedCurrency,
-    required this.conversionRate,
-    required this.formatTime,
-  }) : super(key: key);
+    this.convertedAmount,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final amount = double.tryParse(amountController.text) ?? 0;
-    final convertedAmount = amount / conversionRate;
+    final categoryColor = getColorForCategory(selectedCategory.name);
+    final categoryIcon = getIconForCategory(selectedCategory.name);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 16.h),
-        Text(
-          'Preview',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        SizedBox(height: 8.h),
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Preview',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                  )),
+          SizedBox(height: 12.h),
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      titleController.text.isEmpty
-                          ? 'No title'
-                          : titleController.text,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '-\$${convertedAmount.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      if (selectedCurrency != 'USD')
-                        Text(
-                          '${amount.toStringAsFixed(2)} $selectedCurrency',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                        ),
-                    ],
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: categoryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(getFlutterIcon(categoryIcon),
+                    color: categoryColor, size: 24),
               ),
-              SizedBox(height: 8.h),
-              Row(
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titleController.text.isEmpty
+                          ? 'Enter title...'
+                          : titleController.text,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: titleController.text.isEmpty
+                                ? Colors.grey[400]
+                                : Colors.black,
+                          ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Row(children: [
+                      Text(selectedCategory.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.grey[600])),
+                      SizedBox(width: 8.w),
+                      const Text('•'),
+                      SizedBox(width: 8.w),
+                      Text(getFormattedDate(selectedDate),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.grey[600])),
+                    ]),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    selectedCategory?.name ?? 'No category',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    amountController.text.isEmpty
+                        ? '0.00 $selectedCurrency'
+                        : '${double.tryParse(amountController.text)?.toStringAsFixed(2) ?? 'Invalid'} $selectedCurrency',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: amountController.text.isEmpty
+                              ? Colors.grey[400]
+                              : Colors.black,
+                        ),
                   ),
-                  Spacer(),
-                  Text(
-                    formatTime(selectedDate),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                  if (convertedAmount != null)
+                    Text('≈ \$${convertedAmount!.toStringAsFixed(2)} USD',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.grey[600])),
                 ],
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

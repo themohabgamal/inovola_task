@@ -11,21 +11,31 @@ class ExpenseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate display values with null checks
-    final bool isDifferentCurrency = expense.currency != 'USD';
-    final String originalAmountText =
-        '${expense.amount.toStringAsFixed(2)} ${expense.currency}';
+    // Debug prints to help diagnose the issue
+    print('DEBUG ExpenseItem - Title: ${expense.title}');
+    print('DEBUG ExpenseItem - Amount: ${expense.amount} ${expense.currency}');
+    print('DEBUG ExpenseItem - ConvertedAmount: ${expense.convertedAmount}');
+    print('DEBUG ExpenseItem - Category: ${expense.category}');
+    print('DEBUG ExpenseItem - Time: ${expense.time}');
+    print('DEBUG ExpenseItem - IconName: ${expense.iconName}');
+    print('DEBUG ExpenseItem - BackgroundColor: ${expense.backgroundColor}');
 
-    // Ensure convertedAmount is not null, fallback to amount if it is
-    final double displayAmount = expense.convertedAmount ?? expense.amount;
-    final String usdAmountText = '-\$${displayAmount.toStringAsFixed(2)}';
+    // USD amount (converted amount)
+    final String usdAmountText =
+        '≈ ${(expense.convertedAmount ?? expense.amount).toStringAsFixed(2)} USD';
+
+    // Amount in user's selected currency
+    final String selectedCurrencyAmountText =
+        '-${expense.amount.toStringAsFixed(2)} ${expense.currency ?? 'USD'}';
 
     return Container(
-      height: AppDimens.expenseItemHeight + 5,
-      padding: EdgeInsets.all(AppDimens.paddingS),
+      height: AppDimens.expenseItemHeight != null
+          ? AppDimens.expenseItemHeight! + 5
+          : 73.h,
+      padding: EdgeInsets.all(AppDimens.paddingS ?? 8.0),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(AppDimens.radiusM),
+        color: AppColors.cardBackground ?? Colors.white,
+        borderRadius: BorderRadius.circular(AppDimens.radiusM ?? 12.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -41,29 +51,36 @@ class ExpenseItem extends StatelessWidget {
             height: 38.r,
             decoration: BoxDecoration(
               color: (expense.backgroundColor ?? Colors.grey).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(AppDimens.radiusL),
+              borderRadius: BorderRadius.circular(AppDimens.radiusL ?? 20.0),
             ),
             child: Icon(
               _getIconData(expense.iconName ?? ''),
               color: expense.backgroundColor ?? Colors.grey,
-              size: AppDimens.iconM,
+              size: AppDimens.iconM ?? 20.0,
             ),
           ),
-          SizedBox(width: AppDimens.paddingM),
+          SizedBox(width: AppDimens.paddingM ?? 12.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  expense.title,
+                  expense.title ?? 'No Title',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600, color: AppColors.black),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black ?? Colors.black),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  expense.category,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  expense.category ?? 'No Category',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -72,28 +89,44 @@ class ExpenseItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Display USD amount
-              Text(
-                usdAmountText,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                    ),
-              ),
-              SizedBox(height: 2.h),
-              // Display original amount if different currency
-              if (isDifferentCurrency)
+              // Display original amount with its currency if different from USD
+              if (expense.currency != null && expense.currency != 'USD') ...[
                 Text(
-                  originalAmountText,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                        fontSize: 10,
+                  selectedCurrencyAmountText,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black ?? Colors.black,
                       ),
                 ),
+                SizedBox(height: 2.h),
+                // Display the converted USD amount as a subtitle
+                Text(
+                  usdAmountText,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                        fontSize: 11.sp,
+                      ),
+                ),
+              ] else ...[
+                // If currency is USD, show only USD amount
+                Text(
+                  usdAmountText,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black ?? Colors.black,
+                      ),
+                ),
+                SizedBox(height: 2.h),
+              ],
+
+              // Always show time if available
               if (expense.time != null && expense.time!.isNotEmpty)
                 Text(
                   expense.time!,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                        fontSize: 10.sp,
+                      ),
                 ),
             ],
           ),

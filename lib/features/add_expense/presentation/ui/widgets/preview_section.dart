@@ -38,13 +38,16 @@ class PreviewSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Preview',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  )),
+          Text(
+            'Preview',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                ),
+          ),
           SizedBox(height: 12.h),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -52,8 +55,11 @@ class PreviewSection extends StatelessWidget {
                   color: categoryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(getFlutterIcon(categoryIcon),
-                    color: categoryColor, size: 24),
+                child: Icon(
+                  getFlutterIcon(categoryIcon),
+                  color: categoryColor,
+                  size: 24,
+                ),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -70,26 +76,27 @@ class PreviewSection extends StatelessWidget {
                                 ? Colors.grey[400]
                                 : Colors.black,
                           ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 2.h),
-                    Row(children: [
-                      Text(selectedCategory.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.grey[600])),
-                      SizedBox(width: 8.w),
-                      const Text('•'),
-                      SizedBox(width: 8.w),
-                      Text(getFormattedDate(selectedDate),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.grey[600])),
-                    ]),
+                    Wrap(
+                      spacing: 8.w,
+                      runSpacing: 2.h,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          getFormattedDate(selectedDate),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
+              SizedBox(width: 8.w), // Add a small gap between the columns
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -103,13 +110,15 @@ class PreviewSection extends StatelessWidget {
                               ? Colors.grey[400]
                               : Colors.black,
                         ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (convertedAmount != null)
-                    Text('≈ \$${convertedAmount!.toStringAsFixed(2)} USD',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: Colors.grey[600])),
+                    Text(
+                      '≈ \$${convertedAmount!.toStringAsFixed(2)} USD',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                    ),
                 ],
               ),
             ],

@@ -7,7 +7,13 @@ import 'package:inovola_task/features/dashboard/presentation/pages/widgets/recen
 
 class DashboardContent extends StatelessWidget {
   final DashboardEntity dashboard;
-  const DashboardContent({super.key, required this.dashboard});
+  final bool isLoadingMore;
+
+  const DashboardContent({
+    super.key,
+    required this.dashboard,
+    this.isLoadingMore = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +24,8 @@ class DashboardContent extends StatelessWidget {
         padding: EdgeInsets.only(top: 40.h),
         child: RecentExpensesSection(
           expenses: dashboard.recentExpenses,
+          hasMore: dashboard.hasMore,
+          isLoadingMore: isLoadingMore,
         )
             .animate()
             .slideY(begin: 0.3, duration: 800.ms, curve: Curves.easeOutCubic)

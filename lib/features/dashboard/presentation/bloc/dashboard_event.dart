@@ -4,7 +4,17 @@ abstract class DashboardEvent {}
 
 class DashboardInitializeEvent extends DashboardEvent {}
 
-class DashboardLoadEvent extends DashboardEvent {}
+class DashboardLoadEvent extends DashboardEvent {
+  final bool loadMore;
+  final int offset;
+  final int limit;
+
+  DashboardLoadEvent({
+    this.loadMore = false,
+    this.offset = 0,
+    this.limit = 10,
+  });
+}
 
 class DashboardAddExpenseEvent extends DashboardEvent {
   final ExpenseEntity expense;
@@ -31,3 +41,13 @@ class DashboardFilterChangedEvent extends DashboardEvent {
 }
 
 class _DashboardDataChangedEvent extends DashboardEvent {}
+
+class DashboardLoadMoreExpensesEvent extends DashboardEvent {
+  final int offset;
+  final int limit;
+
+  DashboardLoadMoreExpensesEvent({
+    required this.offset,
+    required this.limit,
+  });
+}

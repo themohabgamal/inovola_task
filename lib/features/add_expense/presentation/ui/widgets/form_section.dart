@@ -1,11 +1,13 @@
-// lib/features/add_expense/presentation/widgets/form_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:inovola_task/core/shared/widgets/app_text_field.dart';
+import 'package:inovola_task/features/add_expense/presentation/ui/widgets/shimmer_loading_widget.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:inovola_task/core/constants/app_text_styles.dart';
 
-// lib/features/add_expense/presentation/widgets/form_section.dart
-class FormSection extends StatelessWidget {
+class FormSection extends StatefulWidget {
   final TextEditingController titleController;
   final TextEditingController amountController;
   final DateTime selectedDate;
@@ -14,7 +16,7 @@ class FormSection extends StatelessWidget {
   final Function(String) onCurrencyChanged;
   final List<String> currencyOptions;
   final VoidCallback onAmountChanged;
-  final bool isLoadingRates; // Add this
+  final bool isLoadingRates;
 
   const FormSection({
     Key? key,
@@ -26,27 +28,40 @@ class FormSection extends StatelessWidget {
     required this.onCurrencyChanged,
     required this.currencyOptions,
     required this.onAmountChanged,
-    required this.isLoadingRates, // Add this
+    required this.isLoadingRates,
   }) : super(key: key);
+
+  @override
+  State<FormSection> createState() => _FormSectionState();
+}
+
+class _FormSectionState extends State<FormSection> {
+  final ImagePicker _picker = ImagePicker();
+  String? _selectedImageName;
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _selectedImageName = image.name;
+        });
+      }
+    } catch (e) {
+      // Handle error
+      print('Error picking image: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Add New Expense',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        SizedBox(height: 16.h),
-        TextFormField(
-          controller: titleController,
-          decoration: InputDecoration(
-            labelText: 'Title',
-            border: OutlineInputBorder(),
-          ),
+        AppTextField(
+          controller: widget.titleController,
+          label: 'Title',
+          hint: 'Enter expense title',
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter a title';
@@ -54,20 +69,19 @@ class FormSection extends StatelessWidget {
             return null;
           },
         ),
+
         SizedBox(height: 16.h),
+
+        // Amount Field with Currency Dropdown
         Row(
           children: [
             Expanded(
               flex: 2,
-              child: TextFormField(
-                controller: amountController,
+              child: AppTextField(
+                controller: widget.amountController,
+                label: 'Amount',
+                hint: '\$50,000',
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: 'Amount',
-                  border: OutlineInputBorder(),
-                  prefixText: selectedCurrency != 'USD' ? '' : '\$',
-                ),
-                onChanged: (value) => onAmountChanged(),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an amount';
@@ -82,77 +96,106 @@ class FormSection extends StatelessWidget {
             SizedBox(width: 16.w),
             Expanded(
               flex: 1,
-              child: isLoadingRates
-                  ? _buildLoadingCurrencyDropdown()
-                  : DropdownButtonFormField<String>(
-                      value: selectedCurrency,
-                      items: currencyOptions
-                          .map((currency) => DropdownMenuItem(
-                                value: currency,
-                                child: Text(currency),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          onCurrencyChanged(value);
-                        }
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Currency',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Currency', style: AppTextStyles.font14Weight600Black),
+                  const SizedBox(height: 8),
+                  widget.isLoadingRates
+                      ? const ShimmerLoadingContainer()
+                      : Container(
+                          height: 50.h,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: widget.selectedCurrency,
+                              isExpanded: true,
+                              items: widget.currencyOptions
+                                  .map((currency) => DropdownMenuItem(
+                                        value: currency,
+                                        child: Text(
+                                          currency,
+                                          style: AppTextStyles
+                                              .font12Weight400Black,
+                                        ),
+                                      ))
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  widget.onCurrencyChanged(value);
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                ],
+              ),
             ),
           ],
         ),
+
         SizedBox(height: 16.h),
-        GestureDetector(
-          onTap: onDateSelected,
-          child: AbsorbPointer(
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Date',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.calendar_today),
-              ),
-              controller: TextEditingController(
-                text: DateFormat('yyyy-MM-dd').format(selectedDate),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select a date';
-                }
-                return null;
-              },
-            ),
+
+        // Date Field
+        AppTextField(
+          controller: TextEditingController(
+            text: DateFormat('MM/dd/yy').format(widget.selectedDate),
           ),
+          label: 'Date',
+          hint: '02/01/24',
+          readOnly: true,
+          onTap: widget.onDateSelected,
+          suffixIcon: Icon(Icons.calendar_month, color: Colors.blue),
+        ),
+
+        SizedBox(height: 16.h),
+
+        // Attach Receipt Section
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Attach Receipt', style: AppTextStyles.font14Weight600Black),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: Text(
+                        _selectedImageName ?? 'Upload image',
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.font12Weight400Black.copyWith(
+                          color: _selectedImageName != null
+                              ? Colors.black
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ],
-    );
-  }
-
-  Widget _buildLoadingCurrencyDropdown() {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: 'Currency',
-        border: OutlineInputBorder(),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Loading currencies...',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
-          SizedBox(width: 8),
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ],
-      ),
     );
   }
 }

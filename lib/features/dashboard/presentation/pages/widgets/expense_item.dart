@@ -11,15 +11,6 @@ class ExpenseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Debug prints to help diagnose the issue
-    print('DEBUG ExpenseItem - Title: ${expense.title}');
-    print('DEBUG ExpenseItem - Amount: ${expense.amount} ${expense.currency}');
-    print('DEBUG ExpenseItem - ConvertedAmount: ${expense.convertedAmount}');
-    print('DEBUG ExpenseItem - Category: ${expense.category}');
-    print('DEBUG ExpenseItem - Time: ${expense.time}');
-    print('DEBUG ExpenseItem - IconName: ${expense.iconName}');
-    print('DEBUG ExpenseItem - BackgroundColor: ${expense.backgroundColor}');
-
     // USD amount (converted amount)
     final String usdAmountText =
         '≈ ${(expense.convertedAmount ?? expense.amount).toStringAsFixed(2)} USD';

@@ -25,6 +25,18 @@ The application is built with a modern, scalable tech stack, emphasizing a separ
 - **Responsive UI**: **Flutter ScreenUtil** to ensure the UI adapts gracefully to different screen sizes.
 - **Animations**: **Flutter Animate** for creating fluid and engaging animations.
 ## 📱 App Visualization
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0e9d4690-69e7-48cf-93aa-f9b6159a558d" width="200" />
+  <img src="https://github.com/user-attachments/assets/63e08ce8-40ab-4ccd-b4e7-733ba840c23e" width="200" />
+  <img src="https://github.com/user-attachments/assets/984b479c-ce90-4cd3-9023-c156a47ea486" width="200" />
+      <img src="https://github.com/user-attachments/assets/8e9cd489-3d54-41e4-87fa-e90fd8f417b9" width="200" />
+  <img src="https://github.com/user-attachments/assets/cfd208eb-58c7-4bc4-aceb-0a2aa7f18e58" width="200" />
+     <img src="https://github.com/user-attachments/assets/49ff9479-a423-43a8-8c57-da79b99b154a" width="200" />
+    <img src="https://github.com/user-attachments/assets/5c1e0c1a-0757-406c-8598-ec6a33c31d7f" width="200" />
+
+</p>
+
+
 
 ## 🚀 Getting Started
 

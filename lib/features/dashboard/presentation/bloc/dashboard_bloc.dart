@@ -14,11 +14,15 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
   Box<ExpenseEntity>? _expenseBox;
   Box? _dashboardBox;
-  String _currentFilter = 'This Month'; // Default filter
+  String _currentFilter = 'This Month';
+  List<ExpenseEntity> _allExpenses = [];
+  List<ExpenseEntity> _currentPageExpenses = [];
+  bool _hasMore = true;
 
   DashboardBloc() : super(DashboardInitial()) {
     on<DashboardInitializeEvent>(_onInitialize);
     on<DashboardLoadEvent>(_onLoadDashboard);
+    on<DashboardLoadMoreExpensesEvent>(_onLoadMoreExpenses);
     on<DashboardAddExpenseEvent>(_onAddExpense);
     on<DashboardUpdateInfoEvent>(_onUpdateInfo);
     on<DashboardDeleteExpenseEvent>(_onDeleteExpense);
@@ -61,6 +65,61 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     }
   }
 
+  Future<void> _onLoadMoreExpenses(
+    DashboardLoadMoreExpensesEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    try {
+      if (_expenseBox == null || _dashboardBox == null || !_hasMore) {
+        return;
+      }
+
+      // Get current state to maintain it during loading
+      final currentState = state;
+      if (currentState is DashboardLoaded) {
+        // Emit loading state first (optional - for showing loading indicator)
+        emit(DashboardLoaded(currentState.dashboard, isLoadingMore: true));
+      }
+
+      // Calculate next page
+      final nextOffset = event.offset;
+      final limit = event.limit;
+
+      final nextEndIndex = nextOffset + limit;
+      final nextPageExpenses = _allExpenses.sublist(
+        nextOffset,
+        nextEndIndex > _allExpenses.length ? _allExpenses.length : nextEndIndex,
+      );
+
+      _currentPageExpenses.addAll(nextPageExpenses);
+      _hasMore = nextEndIndex < _allExpenses.length;
+
+      final userName = _dashboardBox!
+          .get('userName', defaultValue: 'Shihab Rahman') as String;
+      final income =
+          _dashboardBox!.get('income', defaultValue: 10840.00) as double;
+
+      final totalExpenses = _allExpenses.fold<double>(
+          0.0, (sum, expense) => sum + expense.amount);
+      final totalBalance = income - totalExpenses;
+
+      final dashboard = DashboardEntity(
+        userName: userName,
+        totalBalance: totalBalance,
+        income: income,
+        expenses: totalExpenses,
+        recentExpenses: _currentPageExpenses, // Combined list with new items
+        currentFilter: _currentFilter,
+        hasMore: _hasMore,
+      );
+
+      // Emit final state with isLoadingMore: false to show the new items
+      emit(DashboardLoaded(dashboard, isLoadingMore: false));
+    } catch (e) {
+      emit(DashboardError('Failed to load more expenses: ${e.toString()}'));
+    }
+  }
+
   Future<void> _onLoadDashboard(
     DashboardLoadEvent event,
     Emitter<DashboardState> emit,
@@ -71,34 +130,53 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         return;
       }
 
+      // 1. Get ALL expenses from the box
+      final allExpensesFromBox = _expenseBox!.values.toList();
+
+      // 2. Filter ALL expenses
+      final filteredExpenses =
+          _filterExpenses(allExpensesFromBox, _currentFilter);
+
+      // 3. Sort the filtered expenses by date
+      filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
+
+      // 4. Store the sorted, filtered list to be used for all pagination
+      _allExpenses = filteredExpenses;
+
+      // 5. Calculate the current page
+      final limit = event.limit;
+      final offset = event.offset;
+
+      _currentPageExpenses = _allExpenses.sublist(
+        offset,
+        offset + limit > _allExpenses.length
+            ? _allExpenses.length
+            : offset + limit,
+      );
+
+      _hasMore = _currentPageExpenses.length < _allExpenses.length;
+
       // Get dashboard data
       final userName = _dashboardBox!
           .get('userName', defaultValue: 'Shihab Rahman') as String;
       final income =
           _dashboardBox!.get('income', defaultValue: 10840.00) as double;
 
-      // Get all expenses and filter them
-      final allExpenses = _expenseBox!.values.toList();
-      final filteredExpenses = _filterExpenses(allExpenses, _currentFilter);
-
-      // Calculate totals based on all expenses (not filtered)
-      final totalExpenses =
-          allExpenses.fold<double>(0.0, (sum, expense) => sum + expense.amount);
+      final totalExpenses = _allExpenses.fold<double>(
+          0.0, (sum, expense) => sum + expense.amount);
       final totalBalance = income - totalExpenses;
-
-      // Sort filtered expenses by date (most recent first)
-      filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
 
       final dashboard = DashboardEntity(
         userName: userName,
         totalBalance: totalBalance,
         income: income,
         expenses: totalExpenses,
-        recentExpenses: filteredExpenses,
-        currentFilter: _currentFilter, // Add current filter to dashboard entity
+        recentExpenses: _currentPageExpenses,
+        currentFilter: _currentFilter,
+        hasMore: _hasMore,
       );
 
-      emit(DashboardLoaded(dashboard));
+      emit(DashboardLoaded(dashboard, isLoadingMore: !event.loadMore));
     } catch (e) {
       emit(DashboardError('Failed to load dashboard data: ${e.toString()}'));
     }
@@ -268,7 +346,13 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     _DashboardDataChangedEvent event,
     Emitter<DashboardState> emit,
   ) async {
-    add(DashboardLoadEvent());
+    // Maintain current pagination state when data changes
+    final currentItemCount = _currentPageExpenses.length;
+
+    // If we have more items loaded than the default, maintain that state
+    final limitToUse = currentItemCount > 10 ? currentItemCount : 10;
+
+    add(DashboardLoadEvent(offset: 0, limit: limitToUse, loadMore: false));
   }
 
   void _onExpenseDataChanged() {

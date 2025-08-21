@@ -8,7 +8,8 @@ class DashboardLoading extends DashboardState {}
 
 class DashboardLoaded extends DashboardState {
   final DashboardEntity dashboard;
-  DashboardLoaded(this.dashboard);
+  final bool isLoadingMore;
+  DashboardLoaded(this.dashboard, {required this.isLoadingMore});
 }
 
 class DashboardError extends DashboardState {

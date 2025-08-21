@@ -7,7 +7,13 @@ import 'package:inovola_task/features/dashboard/presentation/pages/widgets/dashb
 
 class DashboardSuccessView extends StatelessWidget {
   final DashboardEntity dashboard;
-  const DashboardSuccessView({super.key, required this.dashboard});
+  final bool isLoadingMore;
+
+  const DashboardSuccessView({
+    super.key,
+    required this.dashboard,
+    this.isLoadingMore = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +22,10 @@ class DashboardSuccessView extends StatelessWidget {
         Column(
           children: [
             DashboardHeader(dashboard: dashboard),
-            DashboardContent(dashboard: dashboard),
+            DashboardContent(
+              dashboard: dashboard,
+              isLoadingMore: isLoadingMore, // Pass the loading state down
+            ),
           ],
         ),
         DashboardBalanceCard(dashboard: dashboard),

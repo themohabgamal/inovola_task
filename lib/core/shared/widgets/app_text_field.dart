@@ -43,7 +43,7 @@ class AppTextField extends StatelessWidget {
           inputFormatters: inputFormatters,
           validator: validator,
           style: AppTextStyles.font12Weight400Black.copyWith(
-            color: textColor ?? Colors.black, // 👈 apply text color
+            color: textColor ?? Colors.black,
           ),
           decoration: InputDecoration(
             hintText: hint,

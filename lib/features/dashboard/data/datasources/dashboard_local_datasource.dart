@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
+import 'package:inovola_task/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../domain/entities/dashboard_entity.dart';
 
 class DashboardLocalDataSource {
@@ -52,6 +53,7 @@ class DashboardLocalDataSource {
       income: income,
       expenses: totalExpenses,
       recentExpenses: recentExpenses,
+      currentFilter: 'This Month', // Default filter
     );
   }
 

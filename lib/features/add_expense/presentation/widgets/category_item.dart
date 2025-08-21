@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_text_styles.dart';
+import 'package:inovola_task/features/add_expense/data/repositories/helpers/hive_data_helpers.dart';
 import '../../domain/entities/category_entity.dart';
 
 class CategoryItem extends StatelessWidget {
@@ -31,13 +32,18 @@ class CategoryItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
               border: isSelected
                   ? Border.all(
-                      color: Color(int.parse(category.color)), width: 2)
+                      color: Color(int.parse(category.color)),
+                      width: 2,
+                    )
                   : null,
             ),
             child: Center(
-              child: Text(
-                category.icon,
-                style: const TextStyle(fontSize: 22),
+              child: Icon(
+                HiveDataHelpers.getIconDataFromName(category.icon),
+                size: 24.sp,
+                color: isSelected
+                    ? Colors.white
+                    : Color(int.parse(category.color)),
               ),
             ),
           ),

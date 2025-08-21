@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hive/hive.dart';
 import 'package:inovola_task/core/di/dependency_injection.dart';
 import 'package:inovola_task/core/routing/app_router.dart';
 import 'package:inovola_task/core/routing/routes.dart';

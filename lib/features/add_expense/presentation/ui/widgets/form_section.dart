@@ -105,34 +105,47 @@ class _FormSectionState extends State<FormSection> {
                       ? const ShimmerLoadingContainer()
                       : Container(
                           height: 50.h,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: Colors.grey.shade200, width: 1),
                           ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: widget.selectedCurrency,
-                              isExpanded: true,
-                              items: widget.currencyOptions
-                                  .map((currency) => DropdownMenuItem(
-                                        value: currency,
+                          child: DropdownButton<String>(
+                            value: widget.selectedCurrency,
+                            isExpanded: true,
+                            icon: Icon(Icons.keyboard_arrow_down,
+                                color: Colors.grey[600]),
+                            iconSize: 24,
+                            elevation: 2,
+                            dropdownColor: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            style: AppTextStyles.font12Weight400Black,
+                            underline:
+                                const SizedBox(), // Remove default underline
+                            menuMaxHeight: 200, // Limit dropdown height
+                            items: widget.currencyOptions
+                                .map((currency) => DropdownMenuItem(
+                                      value: currency,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
                                         child: Text(
                                           currency,
                                           style: AppTextStyles
                                               .font12Weight400Black,
                                         ),
-                                      ))
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  widget.onCurrencyChanged(value);
-                                }
-                              },
-                            ),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                widget.onCurrencyChanged(value);
+                              }
+                            },
                           ),
-                        ),
+                        )
                 ],
               ),
             ),

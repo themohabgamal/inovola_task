@@ -84,13 +84,16 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       // Calculate next page
       final nextOffset = event.offset;
       final limit = event.limit;
+      if (nextOffset >= _allExpenses.length) {
+        _hasMore = false;
+        return; // nothing more to load
+      }
 
       final nextEndIndex = nextOffset + limit;
       final nextPageExpenses = _allExpenses.sublist(
         nextOffset,
         nextEndIndex > _allExpenses.length ? _allExpenses.length : nextEndIndex,
       );
-
       _currentPageExpenses.addAll(nextPageExpenses);
       _hasMore = nextEndIndex < _allExpenses.length;
 

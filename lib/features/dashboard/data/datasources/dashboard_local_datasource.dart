@@ -18,6 +18,22 @@ class DashboardLocalDataSource {
     }
   }
 
+  Future<void> resetDashboardData() async {
+    await initializeBoxes();
+
+    final expensesBox = Hive.box<ExpenseEntity>(_expensesBoxName);
+    final dashboardBox = Hive.box(_dashboardBoxName);
+
+    // Clear all stored data
+    await expensesBox.clear();
+    await dashboardBox.clear();
+
+    // Optionally, add fresh default values
+    await dashboardBox.put('userName', 'Shihab Rahman');
+    await dashboardBox.put('totalBalance', 6000.00);
+    await dashboardBox.put('income', 10840.00);
+  }
+
   Future<DashboardEntity> getDashboardData() async {
     await initializeBoxes();
 
@@ -28,7 +44,7 @@ class DashboardLocalDataSource {
     final userName =
         dashboardBox.get('userName', defaultValue: 'Shihab Rahman') as String;
     final totalBalance =
-        dashboardBox.get('totalBalance', defaultValue: 2548.00) as double;
+        dashboardBox.get('totalBalance', defaultValue: 6000.00) as double;
     final income = dashboardBox.get('income', defaultValue: 10840.00) as double;
 
     // Get all expenses from Hive

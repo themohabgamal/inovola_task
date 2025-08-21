@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
+import 'package:inovola_task/features/add_expense/data/repositories/helpers/hive_data_helpers.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
 
 class ExpenseItem extends StatelessWidget {
@@ -38,18 +39,18 @@ class ExpenseItem extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 38.r,
-            height: 38.r,
-            decoration: BoxDecoration(
-              color: (expense.backgroundColor ?? Colors.grey).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(AppDimens.radiusL ?? 20.0),
-            ),
-            child: Icon(
-              _getIconData(expense.iconName ?? ''),
-              color: expense.backgroundColor ?? Colors.grey,
-              size: AppDimens.iconM ?? 20.0,
-            ),
-          ),
+              width: 38.r,
+              height: 38.r,
+              decoration: BoxDecoration(
+                color:
+                    (expense.backgroundColor ?? Colors.grey).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(AppDimens.radiusL ?? 20.0),
+              ),
+              child: Icon(
+                HiveDataHelpers.getIconDataFromName(expense.iconName ?? ''),
+                color: expense.backgroundColor ?? Colors.grey,
+                size: AppDimens.iconM ?? 20.0,
+              )),
           SizedBox(width: AppDimens.paddingM ?? 12.0),
           Expanded(
             child: Column(

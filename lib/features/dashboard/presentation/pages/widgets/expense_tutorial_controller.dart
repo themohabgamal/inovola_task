@@ -5,12 +5,13 @@ class ExpenseTutorialController {
   AnimationController? _tutorialController;
   Animation<Offset>? _slideAnimation;
   Animation<double>? _backgroundOpacityAnimation;
+
   bool _hasShownTutorial = false;
+  bool _disposed = false;
+
   final VoidCallback onTutorialComplete;
 
-  ExpenseTutorialController({
-    required this.onTutorialComplete,
-  });
+  ExpenseTutorialController({required this.onTutorialComplete});
 
   void initialize(TickerProvider vsync) {
     _tutorialController = AnimationController(
@@ -18,27 +19,29 @@ class ExpenseTutorialController {
       vsync: vsync,
     );
 
+    final curved = CurvedAnimation(
+      parent: _tutorialController!,
+      curve: Curves.easeInOut,
+    );
+
     _slideAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(-0.3, 0),
-    ).animate(CurvedAnimation(
-      parent: _tutorialController!,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(curved);
 
     _backgroundOpacityAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _tutorialController!,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(curved);
   }
 
+  /// Public API you call after the list updates.
   void showTutorialIfNeeded({
     required bool hasExpenses,
     required bool wasEmpty,
   }) {
+    if (_disposed) return;
+
     if (hasExpenses) {
       if (!_hasShownTutorial || wasEmpty) {
         _hasShownTutorial = true;
@@ -50,24 +53,37 @@ class ExpenseTutorialController {
   }
 
   void _startTutorialAnimation() {
-    if (_tutorialController == null) return;
+    if (_disposed || _tutorialController == null) return;
 
-    Future.delayed(const Duration(milliseconds: 800), () {
-      _tutorialController?.forward().then((_) {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          _tutorialController?.reverse().then((_) {
-            onTutorialComplete();
-          });
-        });
-      });
+    // Small delay so the list is painted before animating
+    Future.delayed(const Duration(milliseconds: 800), () async {
+      if (_disposed || _tutorialController == null) return;
+
+      try {
+        if (_tutorialController!.isAnimating) return; // avoid overlapping
+        await _tutorialController!.forward();
+        if (_disposed) return;
+
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (_disposed) return;
+
+        await _tutorialController!.reverse();
+        if (_disposed) return;
+
+        onTutorialComplete();
+      } catch (_) {
+        // Swallow if disposed mid-flight
+      }
     });
   }
 
+  /// Wraps only the FIRST item with the tutorial visuals + slide animation.
   Widget wrapWithTutorial({
     required bool isFirstItem,
     required Widget child,
   }) {
     if (!isFirstItem ||
+        _disposed ||
         _slideAnimation == null ||
         _backgroundOpacityAnimation == null) {
       return child;
@@ -75,17 +91,17 @@ class ExpenseTutorialController {
 
     return Stack(
       children: [
-        // Animated delete background for tutorial
+        // Red delete background fading in/out with the animation progress
         AnimatedBuilder(
           animation: _backgroundOpacityAnimation!,
-          builder: (context, child) {
+          builder: (context, _) {
             return Opacity(
               opacity: _backgroundOpacityAnimation!.value,
               child: _buildTutorialBackground(),
             );
           },
         ),
-        // Sliding expense item
+        // Slide the list item to reveal background (tutorial effect)
         SlideTransition(
           position: _slideAnimation!,
           child: child,
@@ -112,6 +128,7 @@ class ExpenseTutorialController {
   }
 
   void dispose() {
+    _disposed = true;
     _tutorialController?.dispose();
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
 import 'package:inovola_task/features/dashboard/presentation/bloc/dashboard_bloc.dart';
@@ -31,13 +33,19 @@ class _ExpenseListState extends State<ExpenseList>
     with TickerProviderStateMixin {
   late PaginationController _paginationController;
   late ExpenseTutorialController _tutorialController;
-  List<ExpenseEntity> _previousExpenses = [];
+
+  // SharedPreferences key for tutorial state
+  static const String _tutorialShownKey = 'expense_tutorial_shown';
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
-    _previousExpenses = List.from(widget.expenses);
+
+    // Schedule tutorial check after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showTutorialOnce();
+    });
   }
 
   void _initializeControllers() {
@@ -55,6 +63,31 @@ class _ExpenseListState extends State<ExpenseList>
     _tutorialController.initialize(this);
   }
 
+  Future<void> _showTutorialOnce() async {
+    // Don't show tutorial if there are no expenses
+    if (widget.expenses.isEmpty) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasShownTutorial = prefs.getBool(_tutorialShownKey) ?? false;
+
+      if (!hasShownTutorial) {
+        _tutorialController.showTutorialIfNeeded(
+          hasExpenses: true,
+          wasEmpty: false,
+        );
+
+        // Mark tutorial as shown
+        await prefs.setBool(_tutorialShownKey, true);
+      }
+    } catch (e) {
+      // Handle SharedPreferences error gracefully
+      debugPrint('Error accessing SharedPreferences: $e');
+      // Optionally show tutorial anyway if SharedPreferences fails
+      // _tutorialController.showTutorialIfNeeded(hasExpenses: true, wasEmpty: false);
+    }
+  }
+
   void _loadMoreExpenses() {
     context.read<DashboardBloc>().add(
           DashboardLoadMoreExpensesEvent(
@@ -68,11 +101,12 @@ class _ExpenseListState extends State<ExpenseList>
   void didUpdateWidget(ExpenseList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Update scroll controller if changed
     if (widget.scrollController != oldWidget.scrollController) {
       _paginationController.updateScrollController(widget.scrollController);
     }
 
-    // Create a new controller instance to update its properties
+    // Update pagination controller with new properties
     _paginationController = PaginationController(
       onLoadMore: _loadMoreExpenses,
       scrollController: widget.scrollController,
@@ -80,17 +114,12 @@ class _ExpenseListState extends State<ExpenseList>
       isLoadingMore: widget.isLoadingMore,
     );
 
-    _handleExpenseUpdates();
-  }
-
-  void _handleExpenseUpdates() {
-    // We remove _checkForNewlyAddedExpense() as it's no longer needed
-    // and causes the unwanted scroll behavior.
-    _tutorialController.showTutorialIfNeeded(
-      hasExpenses: widget.expenses.isNotEmpty,
-      wasEmpty: _previousExpenses.isEmpty,
-    );
-    _previousExpenses = List.from(widget.expenses);
+    // Show tutorial only when expenses list changes from empty to having items
+    if (oldWidget.expenses.isEmpty && widget.expenses.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showTutorialOnce();
+      });
+    }
   }
 
   @override
@@ -141,15 +170,21 @@ class _ExpenseListState extends State<ExpenseList>
   void _showUndoSnackBar(ExpenseEntity expense) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Expense deleted'),
+        backgroundColor: AppColors.primary,
+        content: const Text(
+          'Expense deleted',
+          style: TextStyle(color: Colors.white),
+        ),
         action: SnackBarAction(
           label: 'Undo',
+          textColor: Colors.white,
           onPressed: () {
             context
                 .read<DashboardBloc>()
                 .add(DashboardAddExpenseEvent(expense));
           },
         ),
+        duration: const Duration(seconds: 4),
       ),
     );
   }

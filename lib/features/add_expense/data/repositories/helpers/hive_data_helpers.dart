@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
-
 import '../../../domain/entities/category_entity.dart';
 
 class HiveDataHelpers {
@@ -18,6 +18,36 @@ class HiveDataHelpers {
     'Health': {'icon': 'local_hospital', 'color': '0xFFEF4444'},
     'Education': {'icon': 'school', 'color': '0xFF06B6D4'},
   };
+
+  // Add this method to convert icon names to IconData
+  static IconData getIconDataFromName(String iconName) {
+    switch (iconName) {
+      case 'shopping_cart':
+        return Icons.shopping_cart_outlined;
+      case 'movie':
+        return Icons.movie_outlined;
+      case 'local_gas_station':
+        return Icons.local_gas_station_outlined;
+      case 'shopping_bag':
+        return Icons.shopping_bag_outlined;
+      case 'newspaper':
+        return Icons.newspaper_outlined;
+      case 'directions_car':
+        return Icons.directions_car_outlined;
+      case 'home':
+        return Icons.home_outlined;
+      case 'restaurant':
+        return Icons.restaurant_outlined;
+      case 'local_hospital':
+        return Icons.local_hospital_outlined;
+      case 'school':
+        return Icons.school_outlined;
+      case 'receipt':
+        return Icons.receipt_outlined;
+      default:
+        return Icons.category_outlined;
+    }
+  }
 
   static Future<void> seedCategories(Box<CategoryEntity> box) async {
     final categories = _categoryData.keys.map((name) {

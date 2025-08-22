@@ -5,7 +5,6 @@ import '../../../domain/entities/category_entity.dart';
 
 class HiveDataHelpers {
   HiveDataHelpers._();
-
   static const _categoryData = {
     'Groceries': {'icon': 'shopping_cart', 'color': '0xFF6366F1'},
     'Entertainment': {'icon': 'movie', 'color': '0xFF3B82F6'},
@@ -17,15 +16,31 @@ class HiveDataHelpers {
     'Food': {'icon': 'restaurant', 'color': '0xFF10B981'},
     'Health': {'icon': 'local_hospital', 'color': '0xFFEF4444'},
     'Education': {'icon': 'school', 'color': '0xFF06B6D4'},
+    'Bills': {'icon': 'receipt', 'color': '0xFF3B82F6'},
   };
 
-  // Add this method to convert icon names to IconData
+// ✅ Consistent seeding
+  static Future<void> seedCategories(Box<CategoryEntity> box) async {
+    final categories = _categoryData.entries.map((entry) {
+      final data = entry.value;
+      return CategoryEntity(
+        name: entry.key,
+        icon: data['icon']!, // string (matches getIconDataFromName)
+        color: data['color']!, // keep hex string directly
+      );
+    }).toList();
+    await box.addAll(categories);
+  }
+
+// ✅ Use this when displaying
   static IconData getIconDataFromName(String iconName) {
     switch (iconName) {
       case 'shopping_cart':
         return Icons.shopping_cart_outlined;
       case 'movie':
         return Icons.movie_outlined;
+      case 'category':
+        return Icons.newspaper;
       case 'local_gas_station':
         return Icons.local_gas_station_outlined;
       case 'shopping_bag':
@@ -33,6 +48,7 @@ class HiveDataHelpers {
       case 'newspaper':
         return Icons.newspaper_outlined;
       case 'directions_car':
+      case 'directions_bus':
         return Icons.directions_car_outlined;
       case 'home':
         return Icons.home_outlined;
@@ -47,18 +63,6 @@ class HiveDataHelpers {
       default:
         return Icons.category_outlined;
     }
-  }
-
-  static Future<void> seedCategories(Box<CategoryEntity> box) async {
-    final categories = _categoryData.keys.map((name) {
-      final data = _categoryData[name]!;
-      return CategoryEntity(
-        name: name,
-        icon: data['icon']!,
-        color: int.parse(data['color']!).toString(),
-      );
-    }).toList();
-    await box.addAll(categories);
   }
 
   static ExpenseEntity enhanceExpense(ExpenseEntity expense) {

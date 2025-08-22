@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/expense_item.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/delete_confirmation_dialog.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/expense_item.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/delete_confirmation_dialog.dart';
 
 class ExpenseListItem extends StatelessWidget {
   final ExpenseEntity expense;
   final Function(ExpenseEntity) onDelete;
 
   const ExpenseListItem({
-    Key? key,
+    super.key,
     required this.expense,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

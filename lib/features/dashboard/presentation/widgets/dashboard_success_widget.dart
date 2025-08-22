@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/dashboard_entity.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/dashboard_balance_card.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/dashboard_content.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/dashboard_header.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/dashboard_balance_card.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/dashboard_content.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/dashboard_header.dart';
 
-class DashboardSuccessView extends StatelessWidget {
+class DashboardSuccessWidget extends StatelessWidget {
   final DashboardEntity dashboard;
   final bool isLoadingMore;
 
-  const DashboardSuccessView({
+  const DashboardSuccessWidget({
     super.key,
     required this.dashboard,
     this.isLoadingMore = false,

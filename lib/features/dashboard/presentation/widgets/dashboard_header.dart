@@ -5,7 +5,7 @@ import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/core/shared/widgets/circle_rings_painter.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/dashboard_entity.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/header_section.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/header_section.dart';
 
 class DashboardHeader extends StatelessWidget {
   final DashboardEntity dashboard;
@@ -25,7 +25,7 @@ class DashboardHeader extends StatelessWidget {
           ),
           padding: EdgeInsets.only(
             top: MediaQuery.of(context).padding.top,
-            bottom: AppDimens.paddingL + 40,
+            bottom: AppDimens.paddingL + 20,
           ),
           child: Column(
             children: [

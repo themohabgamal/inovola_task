@@ -3,7 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/dashboard_entity.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/recent_expenses_section.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/recent_expenses/recent_expenses_section.dart';
 
 class DashboardContent extends StatelessWidget {
   final DashboardEntity dashboard;

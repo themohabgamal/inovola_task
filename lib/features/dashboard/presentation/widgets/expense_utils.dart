@@ -16,7 +16,7 @@ class ExpenseUtils {
         return 'shopping_cart';
       case 'Entertainment':
         return 'movie';
-      case 'Transportation':
+      case 'Transport':
         return 'directions_car';
       case 'Rent':
         return 'home';
@@ -39,7 +39,7 @@ class ExpenseUtils {
         return const Color(0xFF6366F1);
       case 'Entertainment':
         return const Color(0xFFF59E0B);
-      case 'Transportation':
+      case 'Transport':
         return const Color(0xFF8B5CF6);
       case 'Rent':
         return const Color(0xFFF97316);

@@ -128,15 +128,30 @@ String formatTime(DateTime dateTime) {
 
 /// Category helpers
 String getIconForCategory(String category) {
-  switch (category.toLowerCase()) {
+  final normalized = category.toLowerCase();
+  switch (normalized) {
     case 'groceries':
       return 'shopping_cart';
     case 'entertainment':
       return 'movie';
     case 'gas':
       return 'local_gas_station';
+    case 'shopping':
+      return 'shopping_bag';
+    case 'news paper':
+      return 'newspaper';
     case 'transport':
-      return 'directions_bus';
+      return 'directions_car';
+    case 'rent':
+      return 'home';
+    case 'food':
+      return 'restaurant';
+    case 'health':
+      return 'local_hospital';
+    case 'education':
+      return 'school';
+    case 'bills':
+      return 'receipt';
     default:
       return 'category';
   }

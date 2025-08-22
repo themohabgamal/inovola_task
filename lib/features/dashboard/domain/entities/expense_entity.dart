@@ -33,10 +33,10 @@ class ExpenseEntity extends HiveObject {
   final double? convertedAmount; // Amount in USD
 
   @HiveField(9)
-  final double? exchangeRate; // Rate used for conversion
+  final double? exchangeRate;
 
   @HiveField(10)
-  final String? receiptPath; // Path to receipt image
+  final String? receiptPath;
 
   ExpenseEntity({
     required this.title,
@@ -70,7 +70,7 @@ class ExpenseEntity extends HiveObject {
 
   String get displayAmount {
     if (isConverted) {
-      return '${formattedAmount} (${formattedConvertedAmount})';
+      return '$formattedAmount ($formattedConvertedAmount)';
     }
     return formattedAmount;
   }

@@ -64,7 +64,7 @@ class AddExpenseFailure extends AddExpenseState {
 
 class AddExpenseReceiptPicked extends AddExpenseState {
   final String receiptName;
-  AddExpenseReceiptPicked(this.receiptName);
+  const AddExpenseReceiptPicked(this.receiptName);
 }
 
 class ExchangeRatesLoading extends AddExpenseState {}

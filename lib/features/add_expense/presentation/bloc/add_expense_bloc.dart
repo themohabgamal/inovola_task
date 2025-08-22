@@ -26,7 +26,7 @@ class AddExpenseBloc extends Bloc<AddExpenseEvent, AddExpenseState> {
   String _selectedCurrency = 'USD';
 
   /// Last converted amount
-  double _convertedAmount = 0.0;
+  final double _convertedAmount = 0.0;
 
   AddExpenseBloc({
     required GetCategoriesUseCase getCategoriesUseCase,

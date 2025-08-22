@@ -3,9 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_colors.dart';
 
-class DashboardErrorView extends StatelessWidget {
+class DashboardErrorWidget extends StatelessWidget {
   final String message;
-  const DashboardErrorView({super.key, required this.message});
+  const DashboardErrorWidget({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {

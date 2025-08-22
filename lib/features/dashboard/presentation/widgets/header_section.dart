@@ -7,18 +7,18 @@ import 'package:inovola_task/core/constants/app_colors.dart';
 import 'package:inovola_task/core/constants/app_dimens.dart';
 import 'package:inovola_task/core/constants/app_strings.dart';
 import 'package:inovola_task/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/time_period_drop_down.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/user_avatar.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/time_period_drop_down.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/user_avatar.dart';
 
 class HeaderSection extends StatelessWidget {
   final String userName;
   final String selectedPeriod; // Add this parameter
 
   const HeaderSection({
-    Key? key,
+    super.key,
     required this.userName,
     required this.selectedPeriod, // Make it required
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -10,10 +10,10 @@ class BottomNavigation extends StatelessWidget {
   final Function(int)? onItemTapped;
 
   const BottomNavigation({
-    Key? key,
+    super.key,
     this.selectedIndex = 0,
     this.onItemTapped,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

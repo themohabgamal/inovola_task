@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
-class DashboardLoadingView extends StatelessWidget {
-  const DashboardLoadingView({super.key});
+class DashboardLoadingWidget extends StatelessWidget {
+  const DashboardLoadingWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +267,7 @@ class DashboardLoadingView extends StatelessWidget {
     required double borderRadius,
   }) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade100,
+      baseColor: Colors.grey.shade200,
       highlightColor: Colors.white,
       child: Container(
         width: width,

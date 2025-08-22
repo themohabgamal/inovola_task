@@ -1,7 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/constants/app_text_styles.dart';
-import 'package:inovola_task/features/add_expense/data/repositories/helpers/hive_data_helpers.dart';
 import '../../domain/entities/category_entity.dart';
 
 class CategoryItem extends StatelessWidget {
@@ -18,6 +19,7 @@ class CategoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log(' ${category.icon}');
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -38,12 +40,14 @@ class CategoryItem extends StatelessWidget {
                   : null,
             ),
             child: Center(
-              child: Icon(
-                HiveDataHelpers.getIconDataFromName(category.icon),
-                size: 24.sp,
-                color: isSelected
-                    ? Colors.white
-                    : Color(int.parse(category.color)),
+              child: Text(
+                category.icon,
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  color: isSelected
+                      ? Colors.white
+                      : Color(int.parse(category.color)),
+                ),
               ),
             ),
           ),

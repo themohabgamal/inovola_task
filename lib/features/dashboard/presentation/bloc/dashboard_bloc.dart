@@ -1,19 +1,23 @@
-import 'dart:ui';
-import 'package:bloc/bloc.dart';
-import 'package:hive/hive.dart';
+// dashboard_bloc.dart
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/expense_entity.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/dashboard_entity.dart';
+import 'package:inovola_task/features/dashboard/domain/services/dashboard_calculator_service.dart';
+import 'package:inovola_task/features/dashboard/domain/services/expense_filter_service.dart';
+import 'package:inovola_task/features/dashboard/domain/services/expense_pagination_service.dart';
 
 part 'dashboard_event.dart';
 part 'dashboard_state.dart';
 
+/// Bloc for managing dashboard state and operations
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   static const String _expensesBoxName = 'expenses_box';
   static const String _dashboardBoxName = 'dashboard_box';
 
   Box<ExpenseEntity>? _expenseBox;
   Box? _dashboardBox;
+
   String _currentFilter = 'This Month';
   List<ExpenseEntity> _allExpenses = [];
   List<ExpenseEntity> _currentPageExpenses = [];
@@ -30,10 +34,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<DashboardFilterChangedEvent>(_onFilterChanged);
     on<_DashboardDataChangedEvent>(_onDataChanged);
 
-    // Initialize automatically
     add(DashboardInitializeEvent());
   }
 
+  /// Initializes Hive boxes and listeners
   Future<void> _onInitialize(
     DashboardInitializeEvent event,
     Emitter<DashboardState> emit,
@@ -41,7 +45,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     try {
       emit(DashboardLoading());
 
-      // Open boxes if not already open
+      // 👇 Ensure shimmer is shown for at least 800ms
+      await Future.delayed(const Duration(milliseconds: 800));
+
       if (!Hive.isBoxOpen(_expensesBoxName)) {
         _expenseBox = await Hive.openBox<ExpenseEntity>(_expensesBoxName);
       } else {
@@ -54,17 +60,16 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         _dashboardBox = Hive.box(_dashboardBoxName);
       }
 
-      // Listen to box changes
       _expenseBox?.listenable().addListener(_onExpenseDataChanged);
       _dashboardBox?.listenable().addListener(_onDashboardDataChanged);
 
-      // Load initial data
       add(DashboardLoadEvent());
     } catch (e) {
       emit(DashboardError('Failed to initialize dashboard: ${e.toString()}'));
     }
   }
 
+  /// Loads more expenses for pagination
   Future<void> _onLoadMoreExpenses(
     DashboardLoadMoreExpensesEvent event,
     Emitter<DashboardState> emit,
@@ -74,55 +79,44 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         return;
       }
 
-      // Get current state to maintain it during loading
       final currentState = state;
       if (currentState is DashboardLoaded) {
-        // Emit loading state first (optional - for showing loading indicator)
         emit(DashboardLoaded(currentState.dashboard, isLoadingMore: true));
       }
 
-      // Calculate next page
       final nextOffset = event.offset;
       final limit = event.limit;
-      if (nextOffset >= _allExpenses.length) {
-        _hasMore = false;
-        return; // nothing more to load
-      }
 
-      final nextEndIndex = nextOffset + limit;
-      final nextPageExpenses = _allExpenses.sublist(
+      final nextPageResult = ExpensePaginationService.getExpensesPage(
+        _allExpenses,
         nextOffset,
-        nextEndIndex > _allExpenses.length ? _allExpenses.length : nextEndIndex,
+        limit,
       );
-      _currentPageExpenses.addAll(nextPageExpenses);
-      _hasMore = nextEndIndex < _allExpenses.length;
+
+      _currentPageExpenses.addAll(nextPageResult.expenses);
+      _hasMore = nextPageResult.hasMore;
 
       final userName = _dashboardBox!
           .get('userName', defaultValue: 'Shihab Rahman') as String;
       final income =
           _dashboardBox!.get('income', defaultValue: 10840.00) as double;
 
-      final totalExpenses = _allExpenses.fold<double>(
-          0.0, (sum, expense) => sum + expense.amount);
-      final totalBalance = income - totalExpenses;
-
-      final dashboard = DashboardEntity(
+      final dashboard = DashboardCalculatorService.createDashboard(
         userName: userName,
-        totalBalance: totalBalance,
         income: income,
-        expenses: totalExpenses,
-        recentExpenses: _currentPageExpenses, // Combined list with new items
+        allExpenses: _allExpenses,
+        recentExpenses: _currentPageExpenses,
         currentFilter: _currentFilter,
         hasMore: _hasMore,
       );
 
-      // Emit final state with isLoadingMore: false to show the new items
       emit(DashboardLoaded(dashboard, isLoadingMore: false));
     } catch (e) {
       emit(DashboardError('Failed to load more expenses: ${e.toString()}'));
     }
   }
 
+  /// Loads dashboard data with expenses and pagination
   Future<void> _onLoadDashboard(
     DashboardLoadEvent event,
     Emitter<DashboardState> emit,
@@ -133,47 +127,31 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         return;
       }
 
-      // 1. Get ALL expenses from the box
       final allExpensesFromBox = _expenseBox!.values.toList();
 
-      // 2. Filter ALL expenses
-      final filteredExpenses =
-          _filterExpenses(allExpensesFromBox, _currentFilter);
+      _allExpenses = ExpenseFilterService.filterExpenses(
+          allExpensesFromBox, _currentFilter);
 
-      // 3. Sort the filtered expenses by date
-      filteredExpenses.sort((a, b) => b.date.compareTo(a.date));
+      _allExpenses.sort((a, b) => b.date.compareTo(a.date));
 
-      // 4. Store the sorted, filtered list to be used for all pagination
-      _allExpenses = filteredExpenses;
-
-      // 5. Calculate the current page
-      final limit = event.limit;
-      final offset = event.offset;
-
-      _currentPageExpenses = _allExpenses.sublist(
-        offset,
-        offset + limit > _allExpenses.length
-            ? _allExpenses.length
-            : offset + limit,
+      final pageResult = ExpensePaginationService.getExpensesPage(
+        _allExpenses,
+        event.offset,
+        event.limit,
       );
 
-      _hasMore = _currentPageExpenses.length < _allExpenses.length;
+      _currentPageExpenses = pageResult.expenses;
+      _hasMore = pageResult.hasMore;
 
-      // Get dashboard data
       final userName = _dashboardBox!
           .get('userName', defaultValue: 'Shihab Rahman') as String;
       final income =
           _dashboardBox!.get('income', defaultValue: 10840.00) as double;
 
-      final totalExpenses = _allExpenses.fold<double>(
-          0.0, (sum, expense) => sum + expense.amount);
-      final totalBalance = income - totalExpenses;
-
-      final dashboard = DashboardEntity(
+      final dashboard = DashboardCalculatorService.createDashboard(
         userName: userName,
-        totalBalance: totalBalance,
         income: income,
-        expenses: totalExpenses,
+        allExpenses: _allExpenses,
         recentExpenses: _currentPageExpenses,
         currentFilter: _currentFilter,
         hasMore: _hasMore,
@@ -185,6 +163,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     }
   }
 
+  /// Handles filter change and reload
   Future<void> _onFilterChanged(
     DashboardFilterChangedEvent event,
     Emitter<DashboardState> emit,
@@ -193,86 +172,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     add(DashboardLoadEvent());
   }
 
-  List<ExpenseEntity> _filterExpenses(
-      List<ExpenseEntity> expenses, String filter) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    switch (filter) {
-      case 'This Month':
-        final firstDayOfMonth = DateTime(now.year, now.month, 1);
-        return expenses
-            .where((expense) => expense.date
-                .isAfter(firstDayOfMonth.subtract(Duration(days: 1))))
-            .toList();
-
-      case 'Last Month':
-        final firstDayOfLastMonth = DateTime(now.year, now.month - 1, 1);
-        final lastDayOfLastMonth = DateTime(now.year, now.month, 0);
-        return expenses
-            .where((expense) =>
-                expense.date
-                    .isAfter(firstDayOfLastMonth.subtract(Duration(days: 1))) &&
-                expense.date
-                    .isBefore(lastDayOfLastMonth.add(Duration(days: 1))))
-            .toList();
-
-      case 'Last 7 Days':
-        final sevenDaysAgo = today.subtract(Duration(days: 7));
-        return expenses
-            .where((expense) =>
-                expense.date.isAfter(sevenDaysAgo.subtract(Duration(days: 1))))
-            .toList();
-
-      case 'This Quarter':
-        final currentQuarter = ((now.month - 1) ~/ 3) + 1;
-        final firstMonthOfQuarter = (currentQuarter - 1) * 3 + 1;
-        final firstDayOfQuarter = DateTime(now.year, firstMonthOfQuarter, 1);
-        return expenses
-            .where((expense) => expense.date
-                .isAfter(firstDayOfQuarter.subtract(Duration(days: 1))))
-            .toList();
-
-      case 'Last Quarter':
-        final currentQuarter = ((now.month - 1) ~/ 3) + 1;
-        final lastQuarter = currentQuarter > 1 ? currentQuarter - 1 : 4;
-        final year = currentQuarter > 1 ? now.year : now.year - 1;
-        final firstMonthOfLastQuarter = (lastQuarter - 1) * 3 + 1;
-        final lastMonthOfLastQuarter = lastQuarter * 3;
-        final firstDayOfLastQuarter =
-            DateTime(year, firstMonthOfLastQuarter, 1);
-        final lastDayOfLastQuarter =
-            DateTime(year, lastMonthOfLastQuarter + 1, 0);
-        return expenses
-            .where((expense) =>
-                expense.date.isAfter(
-                    firstDayOfLastQuarter.subtract(Duration(days: 1))) &&
-                expense.date
-                    .isBefore(lastDayOfLastQuarter.add(Duration(days: 1))))
-            .toList();
-
-      case 'This Year':
-        final firstDayOfYear = DateTime(now.year, 1, 1);
-        return expenses
-            .where((expense) => expense.date
-                .isAfter(firstDayOfYear.subtract(Duration(days: 1))))
-            .toList();
-
-      case 'Last Year':
-        final firstDayOfLastYear = DateTime(now.year - 1, 1, 1);
-        final lastDayOfLastYear = DateTime(now.year - 1, 12, 31);
-        return expenses
-            .where((expense) =>
-                expense.date
-                    .isAfter(firstDayOfLastYear.subtract(Duration(days: 1))) &&
-                expense.date.isBefore(lastDayOfLastYear.add(Duration(days: 1))))
-            .toList();
-
-      default:
-        return expenses;
-    }
-  }
-
+  /// Adds a new expense
   Future<void> _onAddExpense(
     DashboardAddExpenseEvent event,
     Emitter<DashboardState> emit,
@@ -284,12 +184,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       }
 
       await _expenseBox!.add(event.expense);
-      // Dashboard will automatically reload due to listener
     } catch (e) {
       emit(DashboardError('Failed to add expense: ${e.toString()}'));
     }
   }
 
+  /// Updates user info (name or income)
   Future<void> _onUpdateInfo(
     DashboardUpdateInfoEvent event,
     Emitter<DashboardState> emit,
@@ -306,12 +206,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       if (event.income != null) {
         await _dashboardBox!.put('income', event.income);
       }
-      // Dashboard will automatically reload due to listener
     } catch (e) {
       emit(DashboardError('Failed to update dashboard: ${e.toString()}'));
     }
   }
 
+  /// Deletes an expense
   Future<void> _onDeleteExpense(
     DashboardDeleteExpenseEvent event,
     Emitter<DashboardState> emit,
@@ -322,7 +222,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         return;
       }
 
-      // Find the Hive key of the expense
       final key = _expenseBox!.keys.firstWhere(
         (k) => _expenseBox!.get(k) == event.expense,
         orElse: () => null,
@@ -331,13 +230,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       if (key != null) {
         await _expenseBox!.delete(key);
       }
-
-      // No need to manually emit, listener will trigger DashboardLoadEvent
     } catch (e) {
       emit(DashboardError('Failed to delete expense: ${e.toString()}'));
     }
   }
 
+  /// Refreshes dashboard
   Future<void> _onRefresh(
     DashboardRefreshEvent event,
     Emitter<DashboardState> emit,
@@ -345,32 +243,30 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     add(DashboardLoadEvent());
   }
 
+  /// Handles Hive data change events
   Future<void> _onDataChanged(
     _DashboardDataChangedEvent event,
     Emitter<DashboardState> emit,
   ) async {
-    // Maintain current pagination state when data changes
     final currentItemCount = _currentPageExpenses.length;
-
-    // If we have more items loaded than the default, maintain that state
     final limitToUse = currentItemCount > 10 ? currentItemCount : 10;
 
     add(DashboardLoadEvent(offset: 0, limit: limitToUse, loadMore: false));
   }
 
+  /// Listener for expense box changes
   void _onExpenseDataChanged() {
-    // Reload dashboard when expenses change
     add(_DashboardDataChangedEvent());
   }
 
+  /// Listener for dashboard box changes
   void _onDashboardDataChanged() {
-    // Reload dashboard when dashboard settings change
     add(_DashboardDataChangedEvent());
   }
 
+  /// Clean up listeners
   @override
   Future<void> close() {
-    // Remove listeners before closing
     _expenseBox?.listenable().removeListener(_onExpenseDataChanged);
     _dashboardBox?.listenable().removeListener(_onDashboardDataChanged);
     return super.close();

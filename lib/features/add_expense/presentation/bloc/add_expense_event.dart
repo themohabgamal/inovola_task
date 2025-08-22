@@ -36,7 +36,7 @@ class AddExpense extends AddExpenseEvent {
   final String? time;
   final String? receiptPath;
 
-  AddExpense({
+  const AddExpense({
     required this.title,
     required this.category,
     required this.amount,
@@ -78,7 +78,7 @@ class UpdateExpense extends AddExpenseEvent {
   final String? time;
   final String? receiptPath;
 
-  UpdateExpense({
+  const UpdateExpense({
     required this.expense,
     required this.title,
     required this.category,
@@ -97,19 +97,19 @@ class UpdateExpense extends AddExpenseEvent {
 class DeleteExpense extends AddExpenseEvent {
   final ExpenseEntity expense;
 
-  DeleteExpense({required this.expense});
+  const DeleteExpense({required this.expense});
 }
 
 class FetchExchangeRates extends AddExpenseEvent {
   final String baseCurrency;
 
-  FetchExchangeRates({this.baseCurrency = 'USD'});
+  const FetchExchangeRates({this.baseCurrency = 'USD'});
 }
 
 class CurrencyChanged extends AddExpenseEvent {
   final String currency;
 
-  CurrencyChanged(this.currency);
+  const CurrencyChanged(this.currency);
 
   @override
   List<Object> get props => [currency];

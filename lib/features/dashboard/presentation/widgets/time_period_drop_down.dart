@@ -80,8 +80,8 @@ class _TimePeriodDropdownState extends State<TimePeriodDropdown> {
           offset: Offset(0, -5.h),
           scrollbarTheme: ScrollbarThemeData(
             radius: Radius.circular(40.r),
-            thickness: MaterialStateProperty.all(6),
-            thumbVisibility: MaterialStateProperty.all(true),
+            thickness: WidgetStateProperty.all(6),
+            thumbVisibility: WidgetStateProperty.all(true),
           ),
         ),
         menuItemStyleData: MenuItemStyleData(

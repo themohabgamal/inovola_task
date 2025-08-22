@@ -8,7 +8,7 @@ import 'package:inovola_task/features/add_expense/presentation/bloc/add_expense_
 import 'package:inovola_task/features/add_expense/presentation/ui/add_expense_page.dart';
 import 'package:inovola_task/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:inovola_task/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:inovola_task/features/splash_screen.dart';
+import 'package:inovola_task/features/splash/ui/splash_screen.dart';
 
 class AppRouter {
   static Route onGenerateRoute(RouteSettings settings) {

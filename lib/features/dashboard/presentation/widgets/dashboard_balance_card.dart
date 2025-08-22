@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:inovola_task/features/dashboard/domain/entities/dashboard_entity.dart';
-import 'package:inovola_task/features/dashboard/presentation/pages/widgets/balance_card.dart';
+import 'package:inovola_task/features/dashboard/presentation/widgets/balance_card/balance_card.dart';
 
 class DashboardBalanceCard extends StatelessWidget {
   final DashboardEntity dashboard;

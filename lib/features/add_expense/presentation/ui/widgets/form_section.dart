@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inovola_task/core/shared/widgets/app_text_field.dart';
 import 'package:inovola_task/features/add_expense/presentation/ui/widgets/shimmer_loading_widget.dart';
@@ -19,7 +18,7 @@ class FormSection extends StatefulWidget {
   final bool isLoadingRates;
 
   const FormSection({
-    Key? key,
+    super.key,
     required this.titleController,
     required this.amountController,
     required this.selectedDate,
@@ -29,7 +28,7 @@ class FormSection extends StatefulWidget {
     required this.currencyOptions,
     required this.onAmountChanged,
     required this.isLoadingRates,
-  }) : super(key: key);
+  });
 
   @override
   State<FormSection> createState() => _FormSectionState();

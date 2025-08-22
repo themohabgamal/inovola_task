@@ -35,8 +35,12 @@ The application is built with a modern, scalable tech stack, emphasizing a separ
     <img src="https://github.com/user-attachments/assets/5c1e0c1a-0757-406c-8598-ec6a33c31d7f" width="200" />
 
 </p>
+# 📱 App Demo  
+
 🎥 **Watch the demo here:**  
 [▶️ App Demo Video](https://drive.google.com/file/d/18zqWIZK-8gINazfUPLlzVqZLF9RuRBe4/view?usp=sharing)
+
+---
 ## 🚀 Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
